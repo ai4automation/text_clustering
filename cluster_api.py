@@ -21,8 +21,8 @@ def find_labels(byte_stream):
 	data = json.loads(byte_stream)
 	for comm in data:
 		candidates = []
-		preprocessed_comment, sentences = preprocess(comm)
-		comments.append(preprocessed_comment)
+		sentences = preprocess(comm)
+		comments.append('.'.join(sentences))
 		for sent in sentences:
 			candidates.extend(candidate_phrase(sent))
 		lookup[sent] = candidates
