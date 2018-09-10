@@ -1,10 +1,9 @@
 import spacy
 from nltk import ngrams
-import numpy as np
 import math
 
 def candidate_phrase(sentence):
-    n = [3,4]
+    n = [4]
     phrases = []
     for i in n:
             n_grams = ngrams(sentence.split(),i)
@@ -26,3 +25,25 @@ def candidate_phrase(sentence):
             pass
 
     return output_phrases
+
+def document_phrase_frequency(phrase, documents):
+    df = 0
+    pf = 0
+    for doc in documents:
+        if len(doc.split()) > 0:
+            if phrase in doc:
+                df = df + 1
+                pf = pf + (doc.count(phrase) / float(len(doc.split())))
+
+    df = df / float(len(documents))
+    return df, pf
+
+def ranking(M, documents):
+    ranking = {}
+    for seq in M:
+        df, pf = document_phrase_frequency(seq, documents)
+        ranking[seq] = pf * (-math.log(1 - df))
+
+    sequence_sorted = sorted(ranking, key=ranking.get, reverse=True)[:50]
+    final_phrases = filter(lambda x: [x for i in sequence_sorted if x in i and x != i] == [], sequence_sorted)
+    return final_phrases

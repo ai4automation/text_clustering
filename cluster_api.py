@@ -1,9 +1,5 @@
-import itertools
 import json
-import math
-import re
 from io import BytesIO
-
 from flask import Flask, jsonify, request, redirect, flash
 
 app = Flask(__name__)
@@ -14,28 +10,6 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
-def document_phrase_frequency(phrase, documents):
-    df = 0
-    pf = 0
-    for doc in documents:
-        if len(doc.split()) > 0:
-            if phrase in doc and len(phrase.strip().split(' ')) > 1:
-                df = df + 1
-                pf = pf + (doc.count(phrase) / float(len(doc.split())))
-
-    df = df / float(len(documents))
-    return df, pf
-
-def ranking(M, documents):
-    ranking = {}
-    for seq in M:
-        df, pf = document_phrase_frequency(seq, documents)
-        ranking[seq] = pf * (-math.log(1 - df))
-
-    sequence_sorted = sorted(ranking, key=ranking.get, reverse=True)[:50]
-    final_phrases = filter(lambda x: [x for i in sequence_sorted if x in i and x != i] == [], sequence_sorted)
-    return final_phrases
 
 def find_labels(byte_stream):
 	cluster = {}
