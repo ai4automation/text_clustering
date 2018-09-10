@@ -1,6 +1,8 @@
 import json
 from io import BytesIO
 from flask import Flask, jsonify, request, redirect, flash
+from utils.preprocess import preprocess
+from utils.clustering import candidate_phrase, document_phrase_frequency, ranking
 
 app = Flask(__name__)
 ALLOWED_EXTENSIONS = {'json'}
@@ -13,7 +15,31 @@ def allowed_file(filename):
 
 def find_labels(byte_stream):
 	cluster = {}
+	comments = []
+	total_candidates = []
+	lookup = []
 	data = json.loads(byte_stream)
+	for comm in data:
+		candidates = []
+		preprocessed_comment, sentences = preprocess(comm)
+		comments.append(preprocessed_comment)
+		for sent in sentences:
+			candidates.extend(candidate_phrase(sent))
+		lookup[sent] = candidates
+		total_candidates.extend(candidates)
+	candidates = list(set(candidates))
+	ranked_phrases = ranking(candidates, comments)
+	for i in range(0,len(comments)):
+		for phrase in ranked_phrases:
+			if phrase in comments[i]:
+				flag = 1
+				if phrase in cluster:
+					list_comm = cluster[phrase]
+					list_comm.append(data[i])
+					list_comm = list(set(list_comm))
+					cluster[phrase] = list_comm
+				else:
+					cluster[phrase] = [data[i]]
 	return cluster
 
 @app.route('/', methods=['GET', 'POST'])
