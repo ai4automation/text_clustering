@@ -14,6 +14,8 @@ def pre_process(text):
     :param text: string object to pre-process
     :return: list of preprocessed sentences
     """
+    text = clean_html(text)
+
     ENT_TYPES = ['DATE', 'TIME', 'PERCENT', 'MONEY', 'QUANTITY', 'ORDINAL', 'CARDINAL']
     POS_TAGS = ['INTJ', 'AUX', 'CCONJ', 'ADP', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ', 'SYM', 'X']
     ALLOWED_PUNCTUATION = ['/', '-']
