@@ -45,6 +45,6 @@ def ranking(M, documents):
         ranking[seq] = pf * (-math.log(1 - df))
 
     sequence_sorted = sorted(ranking, key=ranking.get, reverse=True)[:50]
-    overlap_phrases = [x for i in sequence_sorted if len(list(set(x.split(' ')) & set(i.split(' '))))>1 and x!=i]
-    #final_phrases = filter(lambda x: [x for i in sequence_sorted if x in i and x != i] == [], sequence_sorted)
+    #final_phrases = filter(lambda x: [x for i in sequence_sorted if len(list(set(x.split(' ')) & set(i.split(' '))))>1 and x!=i], sequence_sorted)
+    final_phrases = filter(lambda x: [x for i in sequence_sorted if x in i and x != i] == [], sequence_sorted)
     return final_phrases
