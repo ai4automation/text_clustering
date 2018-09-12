@@ -145,7 +145,6 @@ def get_n_grams(list_of_texts, n=3):
     for text in all_n_grams:
         one_text_ngrams = []
         for one_ngram in text:
-            print(one_ngram)
             if one_ngram[0].pos_ in POS_TAGS or one_ngram[0].tag_ in POS_TAGS:
                 pass
             elif one_ngram[-1].pos_ in POS_TAGS or one_ngram[-1].tag_ in POS_TAGS:
