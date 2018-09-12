@@ -2,7 +2,7 @@ import spacy
 from nltk import ngrams
 import math
 
-def candidate_phrase(sentence):
+'''def candidate_phrase(sentence):
     n = [4]
     phrases = []
     for i in n:
@@ -24,27 +24,27 @@ def candidate_phrase(sentence):
         else:
             pass
 
-    return output_phrases
+    return output_phrases'''
 
-def document_phrase_frequency(phrase, documents):
+def document_phrase_frequency(phrase, documents, mapping):
     df = 0
     pf = 0
     for doc in documents:
         if len(doc.split()) > 0:
-            if phrase in doc:
+            if phrase in mapping[doc.lstrip().rstrip()]:
                 df = df + 1
-                pf = pf + (doc.count(phrase) / float(len(doc.split())))
+                pf = pf + (mapping[doc].count(phrase) / float(len(mapping[doc].split())))
 
     df = df / float(len(documents))
     return df, pf
 
-def ranking(M, documents):
+def ranking(M, documents,mapping):
     ranking = {}
     for seq in M:
-        df, pf = document_phrase_frequency(seq, documents)
+        df, pf = document_phrase_frequency(seq, documents, mapping)
         ranking[seq] = pf * (-math.log(1 - df))
 
     sequence_sorted = sorted(ranking, key=ranking.get, reverse=True)[:50]
     #final_phrases = filter(lambda x: [x for i in sequence_sorted if len(list(set(x.split(' ')) & set(i.split(' '))))>1 and x!=i], sequence_sorted)
-    final_phrases = filter(lambda x: [x for i in sequence_sorted if x in i and x != i] == [], sequence_sorted)
-    return final_phrases
+    #final_phrases = filter(lambda x: [x for i in sequence_sorted if x in i and x != i] == [], sequence_sorted)
+    return sequence_sorted

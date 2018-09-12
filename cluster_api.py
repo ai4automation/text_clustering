@@ -2,7 +2,7 @@ import json
 from io import BytesIO
 from flask import Flask, jsonify, request, redirect, flash
 from utils.preprocess import get_n_grams
-from utils.clustering import candidate_phrase, document_phrase_frequency, ranking
+from utils.clustering import ranking
 
 app = Flask(__name__)
 ALLOWED_EXTENSIONS = {'json'}
@@ -32,11 +32,12 @@ def find_labels(byte_stream):
 		total_candidates.extend(candidates)
 	candidates = list(set(candidates))
 	print(candidates)'''
-	candidates = get_n_grams(data)
+	mapping_preprocess, mapping_ngrams, candidates = get_n_grams(data)
 	print(candidates)
-	ranked_phrases = ranking(candidates,comments)
-	print(ranked_phrases)
-	for i in range(0,len(comments)):
+	print(mapping_preprocess)
+	ranked_phrases = ranking(candidates,comments, mapping_ngrams)
+	#print(ranked_phrases)
+	'''for i in range(0,len(comments)):
 		for phrase in ranked_phrases:
 			if phrase in comments[i]:
 				flag = 1
@@ -46,7 +47,7 @@ def find_labels(byte_stream):
 					list_comm = list(set(list_comm))
 					cluster[phrase] = list_comm
 				else:
-					cluster[phrase] = [data[i]]
+					cluster[phrase] = [data[i]]'''
 	return cluster
 
 @app.route('/', methods=['GET', 'POST'])
