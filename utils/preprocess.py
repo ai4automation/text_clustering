@@ -32,10 +32,13 @@ def remove_unwanted_pos(text, nlp):
     try:
         for token in doc:
             if token.text in ALLOWED_PUNCTUATION:
-                token_index = token.i
-                start_offset = doc[token_index - 1].idx
-                end_offset = doc[token_index + 1].idx + doc[token_index + 1].__len__()
-                doc.merge(start_offset, end_offset)
+                try:
+                    token_index = token.i
+                    start_offset = doc[token_index - 1].idx
+                    end_offset = doc[token_index + 1].idx + doc[token_index + 1].__len__()
+                    doc.merge(start_offset, end_offset)
+                except IndexError:
+                    pass
     except IndexError:
         pass
 
@@ -76,10 +79,13 @@ def remove_unwanted_pos(text, nlp):
                 try:
                     for small_token in small_doc:
                         if small_token.text in ALLOWED_PUNCTUATION:
-                            token_index = small_token.i
-                            start_offset = small_doc[token_index - 1].idx
-                            end_offset = small_doc[token_index + 1].idx + small_doc[token_index + 1].__len__()
-                            small_doc.merge(start_offset, end_offset)
+                            try:
+                                token_index = small_token.i
+                                start_offset = small_doc[token_index - 1].idx
+                                end_offset = small_doc[token_index + 1].idx + small_doc[token_index + 1].__len__()
+                                small_doc.merge(start_offset, end_offset)
+                            except IndexError:
+                                continue
                 except IndexError:
                     pass
 
@@ -169,4 +175,20 @@ def get_n_grams(list_of_texts, n=3):
 
     # make set of output phrases
     output_phrases = list(set([item for sublist in output_phrases for item in sublist]))
+
+    # return processed n_grams
+    for raw_text in raw_to_processed_text_mapping:
+        processed_text = raw_to_processed_text_mapping[raw_text]
+        raw_to_processed_text_mapping[raw_text] = text_to_ngram[processed_text]
+
     return raw_to_processed_text_mapping, text_to_ngram,  output_phrases
+
+
+if __name__ == '__main__':
+    import json
+    obj = json.load(open('/Users/tanmayee/Downloads/test_3.json'))
+    json.dump(obj, open('/Users/tanmayee/Downloads/test_3.json', 'w', encoding='utf-8'), indent=1)
+    a, b, c = get_n_grams(obj)
+    print(b)
+    json.dump(b, open('/Users/tanmayee/Downloads/test_3_b.json', 'w', encoding='utf-8'), indent=1)
+    json.dump(a, open('/Users/tanmayee/Downloads/test_3_a.json', 'w', encoding='utf-8'), indent=1)
