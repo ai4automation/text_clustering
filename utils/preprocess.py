@@ -6,12 +6,16 @@ from nltk import ngrams
 def clean_html(text):
     html_remover = re.compile('<.*?>')
     text = re.sub(html_remover, ' ', text).replace('&nbsp;', ' ')
+    text = text.replace('\n', '')
+    text = text.replace('\t', '')
     return text
 
 
 def clean_punctuation(text):
-    text = text.replace(' - ', '-')
-    text = text.replace(' / ', '/')
+    text = text.replace(' -', '-')
+    text = text.replace('- ', '-')
+    text = text.replace(' /', '/')
+    text = text.replace('/ ', '/')
     return text
 
 
@@ -23,6 +27,17 @@ def remove_unwanted_pos(text, nlp):
     ALLOWED_PUNCTUATION = ['/', '-']
 
     output_sentences = []
+
+    # re-tokenize for words with hyphen and forward-slash
+    try:
+        for token in doc:
+            if token.text in ALLOWED_PUNCTUATION:
+                token_index = token.i
+                start_offset = doc[token_index - 1].idx
+                end_offset = doc[token_index + 1].idx + doc[token_index + 1].__len__()
+                doc.merge(start_offset, end_offset)
+    except IndexError:
+        pass
 
     for named_entity in list(doc.ents):
         named_entity.merge(tag=named_entity.root.tag_, lemma=named_entity.root.lemma_,
@@ -46,10 +61,27 @@ def remove_unwanted_pos(text, nlp):
             if token.tag_ in POS_TAGS or token.pos_ in POS_TAGS:
                 continue
 
+            if token.like_url:
+                continue
+
+            if token.like_email:
+                continue
+
             # large noun phrases and named entity processing
             if len(token.text.split()) > 1:
                 small_doc = nlp(token.text)
                 start, end = 0, len(small_doc)
+
+                # re-tokenize combining hyphens and forward slash
+                try:
+                    for small_token in small_doc:
+                        if small_token.text in ALLOWED_PUNCTUATION:
+                            token_index = small_token.i
+                            start_offset = small_doc[token_index - 1].idx
+                            end_offset = small_doc[token_index + 1].idx + small_doc[token_index + 1].__len__()
+                            small_doc.merge(start_offset, end_offset)
+                except IndexError:
+                    pass
 
                 for i in range(len(small_doc)):
                     first_token = list(small_doc)[i]
@@ -78,7 +110,6 @@ def remove_unwanted_pos(text, nlp):
             else:
                 output_tokens.append(token)
         output_sentences.append(output_tokens)
-
     return output_sentences
 
 
@@ -88,11 +119,19 @@ def get_n_grams(list_of_texts, n=3):
     nlp = spacy.load('en')
 
     list_of_texts = list(set(list_of_texts))
+    raw_texts = list_of_texts
     list_of_texts = [clean_html(text) for text in list_of_texts]
 
+    # make mapping of raw text to processed text
+    raw_to_processed_text_mapping = {key: value for (key, value) in zip(raw_texts, list_of_texts)}
+
+    list_of_texts = list(set(list_of_texts))
+    list_of_texts_str = list_of_texts
     list_of_texts = [remove_unwanted_pos(text, nlp) for text in list_of_texts]
 
-    all_n_grams = []
+
+    # generate N-grams
+    all_n_grams, sentence_n_grams = [], {}
     for text in list_of_texts:
         text_n_grams = []
         for sentence in text:
@@ -100,23 +139,35 @@ def get_n_grams(list_of_texts, n=3):
             text_n_grams.extend(n_grams)
         all_n_grams.append(text_n_grams)
 
+    # filter N-grams
     output_phrases = []
 
     for text in all_n_grams:
         one_text_ngrams = []
         for one_ngram in text:
+            print(one_ngram)
             if one_ngram[0].pos_ in POS_TAGS or one_ngram[0].tag_ in POS_TAGS:
                 pass
             elif one_ngram[-1].pos_ in POS_TAGS or one_ngram[-1].tag_ in POS_TAGS:
                 pass
+            elif sum([len(token.text) == 0 for token in one_ngram]) > 0:
+                pass
+            elif sum([token.text == ' ' for token in one_ngram]) > 0:
+                pass
             elif sum([token.pos_ == 'VERB' for token in one_ngram]) > 0:
-                one_text_ngrams.append(' '.join([ng.lemma_ for ng in one_ngram]))
+                one_text_ngrams.append(' '.join([ng.lower_ for ng in one_ngram]))
             elif len(list(one_ngram[0].doc.ents)) > 0:
-                one_text_ngrams.append(' '.join([ng.lemma_ for ng in one_ngram]))
+                one_text_ngrams.append(' '.join([ng.lower_ for ng in one_ngram]))
             elif len(list(one_ngram[0].doc.noun_chunks)) > 0:
-                one_text_ngrams.append(' '.join([ng.lemma_ for ng in one_ngram]))
+                one_text_ngrams.append(' '.join([ng.lower_ for ng in one_ngram]))
             else:
                 pass
         output_phrases.append(one_text_ngrams)
 
-    return output_phrases
+    # make text to N-gram mapping
+    text_to_ngram = {text: ngrams_list for (text, ngrams_list) in
+                     zip(list_of_texts_str, output_phrases)}
+
+    # make set of output phrases
+    output_phrases = list(set([item for sublist in output_phrases for item in sublist]))
+    return raw_to_processed_text_mapping, text_to_ngram,  output_phrases
