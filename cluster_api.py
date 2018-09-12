@@ -1,7 +1,7 @@
 import json
 from io import BytesIO
 from flask import Flask, jsonify, request, redirect, flash
-from utils.preprocess import preprocess
+from utils.preprocess import get_n_grams
 from utils.clustering import candidate_phrase, document_phrase_frequency, ranking
 
 app = Flask(__name__)
@@ -17,18 +17,25 @@ def find_labels(byte_stream):
 	cluster = {}
 	comments = []
 	total_candidates = []
-	lookup = []
+	lookup = {}
 	data = json.loads(byte_stream)
+	comments = data
+	'''data = list(set(data))
 	for comm in data:
 		candidates = []
-		sentences = preprocess(comm)
+		sentences = pre_process(comm)
+		print(sentences)
 		comments.append('.'.join(sentences))
 		for sent in sentences:
 			candidates.extend(candidate_phrase(sent))
-		lookup[sent] = candidates
+		lookup[comm] = candidates
 		total_candidates.extend(candidates)
 	candidates = list(set(candidates))
-	ranked_phrases = ranking(candidates, comments)
+	print(candidates)'''
+	candidates = get_n_grams(data)
+	print(candidates)
+	ranked_phrases = ranking(candidates,comments)
+	print(ranked_phrases)
 	for i in range(0,len(comments)):
 		for phrase in ranked_phrases:
 			if phrase in comments[i]:
