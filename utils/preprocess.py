@@ -128,12 +128,14 @@ def get_n_grams(list_of_texts, n=3):
     raw_texts = list_of_texts
     list_of_texts = [clean_html(text) for text in list_of_texts]
 
-    # make mapping of raw text to processed text
-    raw_to_processed_text_mapping = {key: value for (key, value) in zip(raw_texts, list_of_texts)}
-
-    list_of_texts = list(set(list_of_texts))
     list_of_texts_str = list_of_texts
     list_of_texts = [remove_unwanted_pos(text, nlp) for text in list_of_texts]
+
+    # make mapping of raw text to processed text
+    flatten_list_of_texts = []
+    for text in list_of_texts:
+        flatten_list_of_texts.append(' '.join([item.lower_ for sublist in text for item in sublist]))
+    raw_to_processed_text_mapping = {key: value for (key, value) in zip(raw_texts, flatten_list_of_texts)}
 
 
     # generate N-grams
@@ -176,19 +178,12 @@ def get_n_grams(list_of_texts, n=3):
     # make set of output phrases
     output_phrases = list(set([item for sublist in output_phrases for item in sublist]))
 
-    # return processed n_grams
-    for raw_text in raw_to_processed_text_mapping:
-        processed_text = raw_to_processed_text_mapping[raw_text]
-        raw_to_processed_text_mapping[raw_text] = text_to_ngram[processed_text]
-
     return raw_to_processed_text_mapping, text_to_ngram,  output_phrases
 
 
 if __name__ == '__main__':
     import json
     obj = json.load(open('/Users/tanmayee/Downloads/test_3.json'))
-    json.dump(obj, open('/Users/tanmayee/Downloads/test_3.json', 'w', encoding='utf-8'), indent=1)
     a, b, c = get_n_grams(obj)
-    print(b)
     json.dump(b, open('/Users/tanmayee/Downloads/test_3_b.json', 'w', encoding='utf-8'), indent=1)
     json.dump(a, open('/Users/tanmayee/Downloads/test_3_a.json', 'w', encoding='utf-8'), indent=1)
