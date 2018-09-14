@@ -57,7 +57,7 @@ def longest_sub_phrase(phrase_1, phrase_2):
     for sub_phrase in [phrase_1[i:i + (n - 1)] for i in range(0, 2)]:
         if sub_phrase in [phrase_2[i:i + (n - 1)] for i in range(0, 2)]:
             return ' '.join(sub_phrase)
-    return None
+    return ''
 
 
 def post_process(ranked_list, M, documents, mapping, n=3):
@@ -67,15 +67,15 @@ def post_process(ranked_list, M, documents, mapping, n=3):
         flag = 0
         for phrase_2 in final_list:
             intersect_phrase = longest_sub_phrase(phrase, phrase_2)
-            if len(intersect_phrase) == n - 1:
+            if len(intersect_phrase.split(' ')) == n - 1:
                 # print(intersect_phrase)
-                if ' '.join(intersect_phrase) not in merge:
-                    merge[' '.join(intersect_phrase)] = [phrase, phrase_2]
+                if intersect_phrase not in merge:
+                    merge[intersect_phrase] = [phrase, phrase_2]
                 else:
-                    list_merge = merge[' '.join(intersect_phrase)]
+                    list_merge = merge[intersect_phrase]
                     list_merge.append(phrase)
                     list_merge.append(phrase_2)
-                    merge[' '.join(intersect_phrase)] = list_merge
+                    merge[intersect_phrase] = list_merge
                 flag = 1
                 # break
         if flag == 0:
@@ -87,6 +87,7 @@ def post_process(ranked_list, M, documents, mapping, n=3):
             score_children.append(M[children])
         df, pf = document_phrase_frequency(phrase, documents, mapping)
         score_parent = pf * (-math.log(1 - df))
+        print(score_parent,score_children)
         if score_parent > max(score_children):
             final_list.append(phrase)
             final_list = list(set(final_list) - set(merge[phrase]))
