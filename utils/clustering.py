@@ -47,16 +47,34 @@ def ranking(M, documents,mapping):
     sequence_sorted = sorted(ranking, key=ranking.get, reverse=True)[:50]
     return sequence_sorted, ranking
 
-def post_process(ranked_list, M, n=2):
+def post_process(ranked_list, M, documents, mapping, n=3):
 	final_list = []
+	merge = {}
 	for phrase in ranked_list:
 		flag = 0
 		for phrase_2 in final_list:
 			intersect_phrase = list(set(phrase.split(' ')) & set(phrase_2.split(' ')))
-			if len(intersect_phrase)==n:
-				print(intersect_phrase)
+			if len(intersect_phrase)==n-1:
+				#print(intersect_phrase)
+				if ' '.join(intersect_phrase) not in merge:
+					merge[' '.join(intersect_phrase)] = [phrase, phrase_2]
+				else:
+					list_merge = merge[' '.join(intersect_phrase)]
+					list_merge.append(phrase)
+					list_merge.append(phrase_2)
+					merge[' '.join(intersect_phrase)] = list_merge
 				flag = 1
-				break
+				#break
 		if flag==0:
 			final_list.append(phrase)
+	print(merge)
+	for phrase in merge.keys():
+		score_children = []
+		for children in merge[phrase]:
+			score_children.append(M[children])
+		df, pf = document_phrase_frequency(phrase, documents, mapping)
+		score_parent = pf * (-math.log(1 - df))
+		if score_parent > max(score_children):
+			final_list.append(phrase)
+			final_list = list(set(final_list)-set(merge[phrase]))
 	return final_list

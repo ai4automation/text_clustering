@@ -37,7 +37,7 @@ def find_labels(byte_stream):
 	#print(mapping_ngrams)
 	ranked_phrases, score_dict = ranking(candidates,comments, mapping_preprocess)
 	print(ranked_phrases)
-	final_list = post_process(ranked_phrases, score_dict)
+	final_list = post_process(ranked_phrases, score_dict, comments, mapping_preprocess)
 	print(final_list)
 	'''for i in range(0,len(comments)):
 		for phrase in ranked_phrases:
