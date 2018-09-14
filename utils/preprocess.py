@@ -8,6 +8,8 @@ def clean_html(text):
     text = re.sub(html_remover, ' ', text).replace('&nbsp;', ' ')
     text = text.replace('\n', '')
     text = text.replace('\t', '')
+    text = text.replace(',', '.')
+    text = text.replace(';', '.')
     return text
 
 
