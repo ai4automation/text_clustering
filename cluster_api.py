@@ -2,7 +2,7 @@ import json
 from io import BytesIO
 from flask import Flask, jsonify, request, redirect, flash
 from utils.preprocess import get_n_grams
-from utils.clustering import ranking
+from utils.clustering import ranking, post_process
 
 app = Flask(__name__)
 ALLOWED_EXTENSIONS = {'json'}
@@ -34,9 +34,11 @@ def find_labels(byte_stream):
 	print(candidates)'''
 	mapping_preprocess, mapping_ngrams, candidates = get_n_grams(data)
 	print(candidates)
-	print(mapping_preprocess)
-	ranked_phrases = ranking(candidates,comments, mapping_ngrams)
-	#print(ranked_phrases)
+	#print(mapping_ngrams)
+	ranked_phrases, score_dict = ranking(candidates,comments, mapping_preprocess)
+	print(ranked_phrases)
+	final_list = post_process(ranked_phrases, score_dict)
+	print(final_list)
 	'''for i in range(0,len(comments)):
 		for phrase in ranked_phrases:
 			if phrase in comments[i]:

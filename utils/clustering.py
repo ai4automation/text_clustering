@@ -31,7 +31,7 @@ def document_phrase_frequency(phrase, documents, mapping):
     pf = 0
     for doc in documents:
         if len(doc.split()) > 0:
-            if phrase in mapping[doc.lstrip().rstrip()]:
+            if phrase in mapping[doc]:
                 df = df + 1
                 pf = pf + (mapping[doc].count(phrase) / float(len(mapping[doc].split())))
 
@@ -45,6 +45,18 @@ def ranking(M, documents,mapping):
         ranking[seq] = pf * (-math.log(1 - df))
 
     sequence_sorted = sorted(ranking, key=ranking.get, reverse=True)[:50]
-    #final_phrases = filter(lambda x: [x for i in sequence_sorted if len(list(set(x.split(' ')) & set(i.split(' '))))>1 and x!=i], sequence_sorted)
-    #final_phrases = filter(lambda x: [x for i in sequence_sorted if x in i and x != i] == [], sequence_sorted)
-    return sequence_sorted
+    return sequence_sorted, ranking
+
+def post_process(ranked_list, M, n=2):
+	final_list = []
+	for phrase in ranked_list:
+		flag = 0
+		for phrase_2 in final_list:
+			intersect_phrase = list(set(phrase.split(' ')) & set(phrase_2.split(' ')))
+			if len(intersect_phrase)==n:
+				print(intersect_phrase)
+				flag = 1
+				break
+		if flag==0:
+			final_list.append(phrase)
+	return final_list
