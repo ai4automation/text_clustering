@@ -23,7 +23,7 @@ def remove_unwanted_pos(text, nlp):
     doc = nlp(text)
 
     ENT_TYPES = ['DATE', 'TIME', 'PERCENT', 'MONEY', 'QUANTITY', 'ORDINAL', 'CARDINAL']
-    POS_TAGS = ['INTJ', 'AUX', 'CCONJ', 'ADP', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ', 'SYM', 'X']
+    POS_TAGS = ['INTJ', 'AUX', 'CCONJ', 'ADP', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ', 'SYM', 'X', 'MD']
     ALLOWED_PUNCTUATION = ['/', '-']
 
     output_sentences = []
@@ -120,7 +120,7 @@ def remove_unwanted_pos(text, nlp):
 
 
 def get_n_grams(list_of_texts, n=3):
-    POS_TAGS = ['INTJ', 'AUX', 'CCONJ', 'ADP', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ', 'SYM', 'X']
+    POS_TAGS = ['INTJ', 'AUX', 'CCONJ', 'ADP', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ', 'SYM', 'X', 'MD']
 
     nlp = spacy.load('en')
 
