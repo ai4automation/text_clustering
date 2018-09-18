@@ -21,7 +21,7 @@ def find_labels(byte_stream):
 	comments = json.loads(byte_stream)
 	mapping_preprocess, mapping_ngrams, candidates = get_n_grams(comments)
 	print(candidates)
-	#print(mapping_ngrams)
+	print(mapping_ngrams)
 	ranked_phrases, score_dict = ranking(candidates,comments, mapping_preprocess)
 	print(ranked_phrases)
 	final_list = post_process(ranked_phrases, score_dict, comments, mapping_preprocess)
@@ -30,8 +30,8 @@ def find_labels(byte_stream):
 	for comm in lookup_comments:
 		candidates_lookup = mapping_ngrams[comm]
 		if len(candidates_lookup)>0:
-                	ranked_lookup, score_lookup = ranking(candidates)
-			final_list.append(ranked_lookup[0])
+                        ranked_lookup, score_lookup = ranking(candidates, comments, mapping_preprocess)
+                        final_list.append(ranked_lookup[0])
 	final_list = list(set(final_list))
 	for i in range(0,len(comments)):
 		for phrase in final_list:
