@@ -18,38 +18,32 @@ def find_labels(byte_stream):
 	comments = []
 	total_candidates = []
 	lookup = {}
-	data = json.loads(byte_stream)
-	comments = data
-	'''data = list(set(data))
-	for comm in data:
-		candidates = []
-		sentences = pre_process(comm)
-		print(sentences)
-		comments.append('.'.join(sentences))
-		for sent in sentences:
-			candidates.extend(candidate_phrase(sent))
-		lookup[comm] = candidates
-		total_candidates.extend(candidates)
-	candidates = list(set(candidates))
-	print(candidates)'''
-	mapping_preprocess, mapping_ngrams, candidates = get_n_grams(data)
+	comments = json.loads(byte_stream)
+	mapping_preprocess, mapping_ngrams, candidates = get_n_grams(comments)
 	print(candidates)
 	#print(mapping_ngrams)
 	ranked_phrases, score_dict = ranking(candidates,comments, mapping_preprocess)
 	print(ranked_phrases)
 	final_list = post_process(ranked_phrases, score_dict, comments, mapping_preprocess)
 	print(final_list)
-	'''for i in range(0,len(comments)):
-		for phrase in ranked_phrases:
-			if phrase in comments[i]:
-				flag = 1
+	lookup_comments = [k for k in comments if len(list(set(mapping_ngrams[k]) & set(final_list)))==0]
+	for comm in lookup_comments:
+		candidates_lookup = mapping_ngrams[comm]
+		if len(candidates_lookup)>0:
+                	ranked_lookup, score_lookup = ranking(candidates)
+			final_list.append(ranked_lookup[0])
+	final_list = list(set(final_list))
+	for i in range(0,len(comments)):
+		for phrase in final_list:
+			if phrase in mapping_preprocess[comments[i]]:
+				#flag = 1
 				if phrase in cluster:
 					list_comm = cluster[phrase]
-					list_comm.append(data[i])
+					list_comm.append(comments[i])
 					list_comm = list(set(list_comm))
 					cluster[phrase] = list_comm
 				else:
-					cluster[phrase] = [data[i]]'''
+					cluster[phrase] = [comments[i]]
 	return cluster
 
 @app.route('/', methods=['GET', 'POST'])
