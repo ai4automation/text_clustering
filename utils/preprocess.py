@@ -10,6 +10,8 @@ def clean_html(text):
     text = text.replace('\t', '')
     text = text.replace(',', '.')
     text = text.replace(';', '.')
+    text = text.replace('?', '? ')
+    text = text.replace('!', '! ')
     return text
 
 
@@ -112,6 +114,8 @@ def remove_unwanted_pos(text, nlp):
                 for t in small_doc[start:end]:
                     if t.is_punct and t.text not in ALLOWED_PUNCTUATION:
                         continue
+                    elif t.tag_ in POS_TAGS or t.pos_ in POS_TAGS:
+                        continue
                     else:
                         small_docs_token_lemma.append(t)
                 output_tokens.extend(small_docs_token_lemma)
@@ -136,7 +140,8 @@ def get_n_grams(list_of_texts, n=3):
     # make mapping of raw text to processed text
     flatten_list_of_texts = []
     for text in list_of_texts:
-        flatten_list_of_texts.append(' '.join([item.lower_ for sublist in text for item in sublist]))
+        flatten_list_of_texts.append(' '.join(list(filter(lambda x: x not in ['', ' '],
+                                                          [item.lower_.strip() for sublist in text for item in sublist]))))
     raw_to_processed_text_mapping = {key: value for (key, value) in zip(raw_texts, flatten_list_of_texts)}
 
 
@@ -164,18 +169,18 @@ def get_n_grams(list_of_texts, n=3):
             elif sum([token.text == ' ' for token in one_ngram]) > 0:
                 pass
             elif sum([token.pos_ == 'VERB' for token in one_ngram]) > 0:
-                one_text_ngrams.append(' '.join([ng.lower_ for ng in one_ngram]))
+                one_text_ngrams.append(' '.join([ng.lower_.strip() for ng in one_ngram]).strip())
             elif len(list(one_ngram[0].doc.ents)) > 0:
-                one_text_ngrams.append(' '.join([ng.lower_ for ng in one_ngram]))
+                one_text_ngrams.append(' '.join([ng.lower_.strip() for ng in one_ngram]).strip())
             elif len(list(one_ngram[0].doc.noun_chunks)) > 0:
-                one_text_ngrams.append(' '.join([ng.lower_ for ng in one_ngram]))
+                one_text_ngrams.append(' '.join([ng.lower_.strip() for ng in one_ngram]).strip())
             else:
                 pass
         output_phrases.append(one_text_ngrams)
 
     # make text to N-gram mapping
     text_to_ngram = {text: ngrams_list for (text, ngrams_list) in
-                     zip(list_of_texts_str, output_phrases)}
+                     zip(raw_texts, output_phrases)}
 
     # make set of output phrases
     output_phrases = list(set([item for sublist in output_phrases for item in sublist]))
