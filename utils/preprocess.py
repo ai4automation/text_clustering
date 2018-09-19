@@ -103,15 +103,15 @@ def remove_unwanted_pos(text, nlp):
                     first_token = list(small_doc)[i]
                     if first_token.pos_ in POS_TAGS or first_token.is_stop or first_token.tag_ in POS_TAGS \
                             or first_token.is_punct:
-                        start = i+1
+                        start = i + 1
                     else:
                         break
 
-                for j in range(len(small_doc)-1, -1, -1):
+                for j in range(len(small_doc) - 1, -1, -1):
                     last_token = list(small_doc)[j]
                     if last_token.pos_ in POS_TAGS or last_token.is_stop or last_token.tag_ in POS_TAGS \
                             or last_token.is_punct:
-                        end = j-1
+                        end = j - 1
                     else:
                         break
 
@@ -147,16 +147,17 @@ def get_n_grams(list_of_texts, n=3):
     flatten_list_of_texts = []
     for text in list_of_texts:
         flatten_list_of_texts.append(' '.join(list(filter(lambda x: x not in ['', ' '],
-                                                          [item.lower_.strip() for sublist in text for item in sublist]))))
+                                                          [item.lower_.strip() for sublist in text for item in
+                                                           sublist]))))
     raw_to_processed_text_mapping = {key: value for (key, value) in zip(raw_texts, flatten_list_of_texts)}
-
 
     # generate N-grams
     all_n_grams, sentence_n_grams = [], {}
     for text in list_of_texts:
         text_n_grams = []
         for sentence in text:
-            n_grams = ngrams(sentence, n)
+            new_sentence = list(filter(lambda x: len(x.lower_) > 1, sentence))
+            n_grams = ngrams(new_sentence, n)
             text_n_grams.extend(n_grams)
         all_n_grams.append(text_n_grams)
 
@@ -173,6 +174,10 @@ def get_n_grams(list_of_texts, n=3):
             elif sum([len(token.text) == 0 for token in one_ngram]) > 0:
                 pass
             elif sum([token.text == ' ' for token in one_ngram]) > 0:
+                pass
+            elif sum([len(token.text) == 0 for token in one_ngram]) > 0:
+                pass
+            elif len(' '.join([ng.lower_.strip() for ng in one_ngram]).strip().split()) != n:
                 pass
             elif sum([token.pos_ == 'VERB' for token in one_ngram]) > 0:
                 one_text_ngrams.append(' '.join([ng.lower_.strip() for ng in one_ngram]).strip())
@@ -191,12 +196,11 @@ def get_n_grams(list_of_texts, n=3):
     # make set of output phrases
     output_phrases = list(set([item for sublist in output_phrases for item in sublist]))
 
-    return raw_to_processed_text_mapping, text_to_ngram,  output_phrases
+    return raw_to_processed_text_mapping, text_to_ngram, output_phrases
 
 
 if __name__ == '__main__':
     import json
-    obj = json.load(open('/Users/tanmayee/Downloads/test_3.json'))
-    a, b, c = get_n_grams(obj)
-    json.dump(b, open('/Users/tanmayee/Downloads/test_3_b.json', 'w', encoding='utf-8'), indent=1)
-    json.dump(a, open('/Users/tanmayee/Downloads/test_3_a.json', 'w', encoding='utf-8'), indent=1)
+
+    obj = json.load(open('/Users/tanmayee/Downloads/test_4.json'))
+    print(get_n_grams(obj[:3]))
