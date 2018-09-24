@@ -1,6 +1,7 @@
 import spacy
 import re
 from nltk import ngrams
+from nltk.corpus import stopwords
 
 
 def clean_html(text):
@@ -30,6 +31,7 @@ def clean_punctuation(text):
 
 
 def remove_unwanted_pos(text, nlp):
+    stop_words = stopwords.words('english')
     doc = nlp(text)
 
     ENT_TYPES = ['DATE', 'TIME', 'PERCENT', 'MONEY', 'QUANTITY', 'ORDINAL', 'CARDINAL']
@@ -41,7 +43,7 @@ def remove_unwanted_pos(text, nlp):
     # re-tokenize for words with hyphen and forward-slash
     try:
         for token in doc:
-            if token.text in ALLOWED_PUNCTUATION:
+            if token.lower_ in ALLOWED_PUNCTUATION:
                 try:
                     token_index = token.i
                     start_offset = doc[token_index - 1].idx
@@ -78,6 +80,12 @@ def remove_unwanted_pos(text, nlp):
                 continue
 
             if token.like_email:
+                continue
+
+            if token.lower_ in stop_words:
+                continue
+
+            elif any(char.isdigit() for char in token.lower_):
                 continue
 
             # large noun phrases and named entity processing
@@ -122,6 +130,10 @@ def remove_unwanted_pos(text, nlp):
                         continue
                     elif t.tag_ in POS_TAGS or t.pos_ in POS_TAGS:
                         continue
+                    elif t.lower_ in stop_words:
+                        continue
+                    elif any(char.isdigit() for char in t.lower_):
+                        continue
                     else:
                         small_docs_token_lemma.append(t)
                 output_tokens.extend(small_docs_token_lemma)
@@ -140,7 +152,6 @@ def get_n_grams(list_of_texts, n=3):
     raw_texts = list_of_texts
     list_of_texts = [clean_html(text) for text in list_of_texts]
 
-    list_of_texts_str = list_of_texts
     list_of_texts = [remove_unwanted_pos(text, nlp) for text in list_of_texts]
 
     # make mapping of raw text to processed text
