@@ -85,7 +85,7 @@ def remove_unwanted_pos(text, nlp):
             if token.lower_ in stop_words:
                 continue
 
-            elif any(char.isdigit() for char in token.lower_):
+            if any(char.isdigit() for char in token.lower_):
                 continue
 
             # large noun phrases and named entity processing
