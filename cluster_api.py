@@ -19,14 +19,8 @@ def filter_unwanted(candidates):
                 "center", "exit", "time", "access", "administrator", "support", "assist", "skills",
                 "proveitsupport", "contact"]
 
-    filtered_old = []
-    for phrase in candidates:
-        if not any(n in phrase for n in unwanted):
-            filtered_old.append(phrase)
-
     filtered = filter(lambda phrase_: not any(n in phrase_ for n in unwanted), candidates)
     filtered = list(filtered)
-    assert filtered == filtered_old
 
     return filtered
 
