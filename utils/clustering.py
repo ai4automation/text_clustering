@@ -80,14 +80,13 @@ def post_process(ranked_list, M, documents, mapping, n=3):
                 # break
         if flag == 0:
             final_list.append(phrase)
-    print(merge)
+
     for phrase in merge.keys():
-        score_children = []
-        for children in merge[phrase]:
-            score_children.append(M[children])
         df, pf = document_phrase_frequency(phrase, documents, mapping)
         score_parent = pf * (-math.log(1 - df))
-        print(score_parent,score_children)
+
+        score_children = [M[children] for children in merge[phrase]]
+
         if score_parent > max(score_children):
             final_list.append(phrase)
             final_list = list(set(final_list) - set(merge[phrase]))
