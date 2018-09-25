@@ -69,13 +69,13 @@ def post_process(ranked_list, M, documents, mapping, n=3):
             intersect_phrase = longest_sub_phrase(phrase, phrase_2)
             if len(intersect_phrase.split(' ')) == n - 1:
                 # print(intersect_phrase)
-                if intersect_phrase not in merge:
-                    merge[intersect_phrase] = [phrase, phrase_2]
-                else:
+                try:
                     list_merge = merge[intersect_phrase]
                     list_merge.append(phrase)
                     list_merge.append(phrase_2)
                     merge[intersect_phrase] = list_merge
+                except KeyError:
+                    merge[intersect_phrase] = [phrase, phrase_2]
                 flag = 1
                 # break
         if flag == 0:
