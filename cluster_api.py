@@ -15,7 +15,7 @@ def allowed_file(filename):
 
 def filter_unwanted(candidates):
     unwanted = ["thank", "ibm", "please", "apologize", "dear", "sincerely", "helpdesk", "better",
-                "help-desk", "telephone", "regards", "phone", "regret", "gmail", "yahoo", "hotmail",
+                "help-desk", "telephone", "regards", "regret", "gmail", "yahoo", "hotmail",
                 "center", "exit", "time", "access", "administrator", "support", "assist", "skills",
                 "proveitsupport", "contact"]
 
@@ -25,33 +25,34 @@ def filter_unwanted(candidates):
     return filtered
 
 
-def find_labels(byte_stream):
+def find_labels(byte_stream,n=3,coverage=0):
     cluster = {}
     comments = []
     total_candidates = []
     lookup = {}
     comments = json.loads(byte_stream)
     comments = list(set(comments))
-    print(len(comments))
-    mapping_preprocess, mapping_ngrams, candidates = get_n_grams(comments)
+    print("number of comments (unique): ", len(comments))
+    mapping_preprocess, mapping_ngrams, candidates = get_n_grams(comments,n)
     # print(candidates)
     # print(mapping_ngrams)
     # print("filtered: ", filter_unwanted(list(set(candidates))))
     ranked_phrases, score_dict = ranking(filter_unwanted(list(set(candidates))), comments, mapping_preprocess)
     # print(ranked_phrases)
     final_list = post_process(ranked_phrases, score_dict, comments, mapping_preprocess)
-    print(final_list)
-    lookup_comments = [k for k in comments if len(list(set(mapping_ngrams[k]) & set(final_list))) == 0]
-    for comm in lookup_comments:
-        candidates_lookup = mapping_ngrams[comm]
-        if len(candidates_lookup) > 0:
-            ranked_lookup, score_lookup = ranking(filter_unwanted(list(set(candidates_lookup))), comments,
+    print("ranked list: ", final_list)
+    if coverage!=0:
+        lookup_comments = [k for k in comments if len(list(set(mapping_ngrams[k]) & set(final_list))) == 0]
+        for comm in lookup_comments:
+            candidates_lookup = mapping_ngrams[comm]
+            if len(candidates_lookup) > 0:
+                ranked_lookup, score_lookup = ranking(filter_unwanted(list(set(candidates_lookup))), comments,
                                                   mapping_preprocess)
-            if len(ranked_lookup) > 0:
-                final_list.append(ranked_lookup[0])
+                if len(ranked_lookup) > 0:
+                    final_list.append(ranked_lookup[0])
     final_list = list(set(final_list))
-    print("final list: ", final_list)
-    uncommented = 0
+    #print("final list after lookup: ", final_list)
+    #uncommented = 0
     for i in range(0, len(comments)):
         flag = 0
         for phrase in final_list:
@@ -66,9 +67,18 @@ def find_labels(byte_stream):
                     cluster[phrase] = [comments[i]]
 
         if flag == 0:
-            uncommented += 1
-    print(uncommented)
-    return cluster
+           phrase = "un-labeled"
+           try:
+               list_comm = cluster[phrase]
+               list_comm.append(comments[i])
+               list_comm = list(set(list_comm))
+               cluster[phrase] = list_comm
+           except KeyError:
+               cluster[phrase] = [comments[i]]
+            #uncommented += 1
+            #print("uncommented: ", comments[i], mapping_ngrams[comments[i]])
+    #print("left uncommented: ", uncommented)
+    return cluster, (len(comments)-len(cluster["un-labeled"]))/float(len(comments))
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -87,7 +97,7 @@ def main():
         if file__ and allowed_file(file__.filename):
             mem_file = BytesIO()
             file__.save(mem_file)
-            output = find_labels(mem_file.getvalue().decode('UTF-8'))
+            output = find_labels(mem_file.getvalue().decode('UTF-8'),n,coverage)
             response = jsonify(output)
             response.status_code = 201
             return response
