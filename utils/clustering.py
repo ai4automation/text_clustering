@@ -1,30 +1,6 @@
-import spacy
-from nltk import ngrams
 import math
-
-'''def candidate_phrase(sentence):
-    n = [4]
-    phrases = []
-    for i in n:
-            n_grams = ngrams(sentence.split(),i)
-            phrases.extend([ ' '.join(grams) for grams in n_grams])
-
-    output_phrases = []
-    nlp = spacy.load('en')
-    for p in phrases:
-        doc = nlp(p)
-        #if 'datum request' in p:
-        #    print(p, [token.pos_ for token in doc], len(list(doc.ents)), len(list(doc.noun_chunks)))
-        if len(list(doc.ents)) != 0:
-            output_phrases.append(p)
-        elif len(list(doc.noun_chunks)) != 0:
-            output_phrases.append(p)
-        elif sum([token.pos_ == 'VERB' for token in doc]) > 0:
-            output_phrases.append(p)
-        else:
-            pass
-
-    return output_phrases'''
+import json
+from utils.preprocess import get_n_grams
 
 
 def document_phrase_frequency(phrase, documents, mapping):
@@ -41,13 +17,13 @@ def document_phrase_frequency(phrase, documents, mapping):
 
 
 def ranking(M, documents, mapping):
-    ranking = {}
+    ranking_ = {}
     for seq in M:
         df, pf = document_phrase_frequency(seq, documents, mapping)
-        ranking[seq] = pf * (-math.log(1 - df))
+        ranking_[seq] = pf * (-math.log(1 - df))
 
-    sequence_sorted = sorted(ranking, key=ranking.get, reverse=True)[:50]
-    return sequence_sorted, ranking
+    sequence_sorted = sorted(ranking_, key=ranking_.get, reverse=True)[:50]
+    return sequence_sorted, ranking_
 
 
 def longest_sub_phrase(phrase_1, phrase_2):
@@ -91,3 +67,63 @@ def post_process(ranked_list, M, documents, mapping, n=3):
             final_list.append(phrase)
             final_list = list(set(final_list) - set(merge[phrase]))
     return final_list
+
+
+def filter_unwanted(candidates):
+    unwanted = ["thank", "ibm", "please", "apologize", "dear", "sincerely", "helpdesk", "better",
+                "help-desk", "telephone", "regards", "regret", "gmail", "yahoo", "hotmail",
+                "center", "exit", "time", "access", "administrator", "support", "assist", "skills",
+                "proveitsupport", "contact"]
+
+    filtered = filter(lambda phrase_: not any(n in phrase_ for n in unwanted), candidates)
+    filtered = list(filtered)
+
+    return filtered
+
+
+def find_labels(byte_stream, n=3, coverage=True):
+    cluster = {}
+    comments = json.loads(byte_stream)
+    comments = list(set(comments))
+    print("number of comments (unique): ", len(comments))
+    mapping_preprocess, mapping_ngrams, candidates = get_n_grams(comments, n)
+
+    ranked_phrases, score_dict = ranking(filter_unwanted(list(set(candidates))), comments, mapping_preprocess)
+
+    final_list = post_process(ranked_phrases, score_dict, comments, mapping_preprocess)
+    print("ranked list: ", final_list)
+    if coverage:
+        lookup_comments = [k for k in comments if len(list(set(mapping_ngrams[k]) & set(final_list))) == 0]
+        for comm in lookup_comments:
+            candidates_lookup = mapping_ngrams[comm]
+            if len(candidates_lookup) > 0:
+                ranked_lookup, score_lookup = ranking(filter_unwanted(list(set(candidates_lookup))), comments,
+                                                      mapping_preprocess)
+                if len(ranked_lookup) > 0:
+                    final_list.append(ranked_lookup[0])
+    final_list = list(set(final_list))
+
+    for i in range(0, len(comments)):
+        flag = 0
+        for phrase in final_list:
+            if phrase in mapping_preprocess[comments[i]]:
+                flag = 1
+                try:
+                    list_comm = cluster[phrase]
+                    list_comm.append(comments[i])
+                    list_comm = list(set(list_comm))
+                    cluster[phrase] = list_comm
+                except KeyError:
+                    cluster[phrase] = [comments[i]]
+
+        if flag == 0:
+            phrase = "un-labeled"
+            try:
+                list_comm = cluster[phrase]
+                list_comm.append(comments[i])
+                list_comm = list(set(list_comm))
+                cluster[phrase] = list_comm
+            except KeyError:
+                cluster[phrase] = [comments[i]]
+
+    return cluster, (len(comments) - len(cluster["un-labeled"])) / float(len(comments))

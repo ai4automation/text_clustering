@@ -1,124 +1,74 @@
-import json
 from io import BytesIO
-from flask import Flask, jsonify, request, redirect, flash
-from utils.preprocess import get_n_grams
-from utils.clustering import ranking, post_process
+from flask import Flask
+from utils.clustering import find_labels
+from werkzeug.contrib.fixers import ProxyFix
+from flask_restplus import Api, Resource
+from flask_restplus import reqparse
+from werkzeug.datastructures import FileStorage
+from werkzeug.exceptions import InternalServerError, BadRequest
 
+
+# settings
+settings = {
+    'version': '2.0',
+    'title': 'Semantic Clustering API',
+    'description': 'Short text clustering API',
+    'api_namespace': 'text_clustering',
+    'api_description': 'short text clustering and labelling',
+    'allowed_extensions': {'json'}
+}
+
+# flask definitions
 app = Flask(__name__)
-ALLOWED_EXTENSIONS = {'json'}
+app.wsgi_app = ProxyFix(app.wsgi_app)
+
+# flask-restplus definitions
+api = Api(app, version=settings['version'], title=settings['title'], description=settings['description'])
+ns = api.namespace(settings['api_namespace'], description=settings['api_description'])
+
+# request parser
+cluster_parser = reqparse.RequestParser()
+cluster_parser.add_argument('file', location='files', type=FileStorage, required=True, help='JSON file to cluster')
+cluster_parser.add_argument('n', required=True, help='Maximum word length for cluster labels', type=int)
+cluster_parser.add_argument('coverage', default='false', choices=['true', 'false'], help='Maximum coverage')
 
 
 def allowed_file(filename):
     return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           filename.rsplit('.', 1)[1].lower() in settings['allowed_extensions']
 
 
-def filter_unwanted(candidates):
-    unwanted = ["thank", "ibm", "please", "apologize", "dear", "sincerely", "helpdesk", "better",
-                "help-desk", "telephone", "regards", "regret", "gmail", "yahoo", "hotmail",
-                "center", "exit", "time", "access", "administrator", "support", "assist", "skills",
-                "proveitsupport", "contact"]
+@ns.route('/')
+class Cluster(Resource):
+    @ns.response(200, 'Success')
+    @ns.response(400, 'Validation Error')
+    @ns.response(500, 'Internal Server Error')
+    @ns.expect(cluster_parser, validate=False)
+    @ns.doc('cluster')
+    def post(self):
+        args = cluster_parser.parse_args()
 
-    filtered = filter(lambda phrase_: not any(n in phrase_ for n in unwanted), candidates)
-    filtered = list(filtered)
+        if not allowed_file(args['file'].filename):
+            error = BadRequest()
+            error.data = ['This filetype is not allowed. Please contact admin.']
+            raise error
 
-    return filtered
-
-
-def find_labels(byte_stream,n=3,coverage=True):
-    cluster = {}
-    comments = []
-    total_candidates = []
-    lookup = {}
-    comments = json.loads(byte_stream)
-    comments = list(set(comments))
-    print("number of comments (unique): ", len(comments))
-    mapping_preprocess, mapping_ngrams, candidates = get_n_grams(comments,n)
-    # print(candidates)
-    # print(mapping_ngrams)
-    # print("filtered: ", filter_unwanted(list(set(candidates))))
-    ranked_phrases, score_dict = ranking(filter_unwanted(list(set(candidates))), comments, mapping_preprocess)
-    # print(ranked_phrases)
-    final_list = post_process(ranked_phrases, score_dict, comments, mapping_preprocess)
-    print("ranked list: ", final_list)
-    if coverage:
-        lookup_comments = [k for k in comments if len(list(set(mapping_ngrams[k]) & set(final_list))) == 0]
-        for comm in lookup_comments:
-            candidates_lookup = mapping_ngrams[comm]
-            if len(candidates_lookup) > 0:
-                ranked_lookup, score_lookup = ranking(filter_unwanted(list(set(candidates_lookup))), comments,
-                                                  mapping_preprocess)
-                if len(ranked_lookup) > 0:
-                    final_list.append(ranked_lookup[0])
-    final_list = list(set(final_list))
-    #print("final list after lookup: ", final_list)
-    #uncommented = 0
-    for i in range(0, len(comments)):
-        flag = 0
-        for phrase in final_list:
-            if phrase in mapping_preprocess[comments[i]]:
-                flag = 1
-                try:
-                    list_comm = cluster[phrase]
-                    list_comm.append(comments[i])
-                    list_comm = list(set(list_comm))
-                    cluster[phrase] = list_comm
-                except KeyError:
-                    cluster[phrase] = [comments[i]]
-
-        if flag == 0:
-           phrase = "un-labeled"
-           try:
-               list_comm = cluster[phrase]
-               list_comm.append(comments[i])
-               list_comm = list(set(list_comm))
-               cluster[phrase] = list_comm
-           except KeyError:
-               cluster[phrase] = [comments[i]]
-            #uncommented += 1
-            #print("uncommented: ", comments[i], mapping_ngrams[comments[i]])
-    #print("left uncommented: ", uncommented)
-    return cluster, (len(comments)-len(cluster["un-labeled"]))/float(len(comments))
-
-
-@app.route('/', methods=['GET', 'POST'])
-def main():
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file__ = request.files.get('file')
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        if file__.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file__ and allowed_file(file__.filename):
+        try:
+            n = args['n']
+            coverage = True if args['coverage'] is 'true' else False
             mem_file = BytesIO()
-            file__.save(mem_file)
-            output = find_labels(mem_file.getvalue().decode('UTF-8'),n,coverage)
-            response = jsonify(output)
-            response.status_code = 201
-            return response
+            args['file'].save(mem_file)
 
-        else:
-            response = jsonify({'error': 'Some error! Please contact admin.'})
-            response.status_code = 500
-            return response
+            clusters, coverage = find_labels(mem_file.getvalue().decode('UTF-8'), n, coverage)
+            output = {'coverage': coverage, 'clusters': clusters}
 
-    return '''
-            <!doctype html>
-            <title>Convert</title>
-            <h1>Upload new file to convert</h1>
-            <form method=post enctype=multipart/form-data>
-              <p><input type=file name=file>
-                 <input type=submit value=Upload>
-            </form>
-            '''
+        except:
+            error = InternalServerError()
+            error.data = ['Some error. Please contact admin.']
+            raise error
+
+        return output, 200
 
 
 if __name__ == '__main__':
-    app.secret_key = 'super secret key'
-    app.config['SESSION_TYPE'] = 'filesystem'
     app.run(host='0.0.0.0', debug=True, port=3000)
