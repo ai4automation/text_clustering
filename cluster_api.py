@@ -25,7 +25,7 @@ def filter_unwanted(candidates):
     return filtered
 
 
-def find_labels(byte_stream,n=3,coverage=0):
+def find_labels(byte_stream,n=3,coverage=True):
     cluster = {}
     comments = []
     total_candidates = []
@@ -41,7 +41,7 @@ def find_labels(byte_stream,n=3,coverage=0):
     # print(ranked_phrases)
     final_list = post_process(ranked_phrases, score_dict, comments, mapping_preprocess)
     print("ranked list: ", final_list)
-    if coverage!=0:
+    if coverage:
         lookup_comments = [k for k in comments if len(list(set(mapping_ngrams[k]) & set(final_list))) == 0]
         for comm in lookup_comments:
             candidates_lookup = mapping_ngrams[comm]
