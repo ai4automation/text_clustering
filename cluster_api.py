@@ -1,11 +1,28 @@
 from io import BytesIO
 from flask import Flask
 from utils.clustering import find_labels
-from werkzeug.contrib.fixers import ProxyFix
 from flask_restplus import Api, Resource
 from flask_restplus import reqparse
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import InternalServerError, BadRequest
+
+
+class ReverseProxied(object):
+    def __init__(self, app):
+        self.app = app
+
+    def __call__(self, environ, start_response):
+        script_name = environ.get('HTTP_X_SCRIPT_NAME', '')
+        if script_name:
+            environ['SCRIPT_NAME'] = script_name
+            path_info = environ['PATH_INFO']
+            if path_info.startswith(script_name):
+                environ['PATH_INFO'] = path_info[len(script_name):]
+
+        scheme = environ.get('HTTP_X_SCHEME', '')
+        if scheme:
+            environ['wsgi.url_scheme'] = scheme
+        return self.app(environ, start_response)
 
 
 # settings
@@ -20,7 +37,7 @@ settings = {
 
 # flask definitions
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app)
+app.wsgi_app = ReverseProxied(app.wsgi_app)
 
 # flask-restplus definitions
 api = Api(app, version=settings['version'], title=settings['title'], description=settings['description'])
