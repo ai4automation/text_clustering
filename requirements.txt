@@ -1,4 +1,4 @@
-flask_restplus==0.10.0
+flask_restplus==0.10.1
 nltk==3.3
 spacy==2.0.12
 Werkzeug==0.14.1
