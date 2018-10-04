@@ -15,7 +15,7 @@ import utils.event_cluster
 
 
 # flask definitions
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='')
 app.wsgi_app = ReverseProxied(app.wsgi_app)
 
 
@@ -97,4 +97,5 @@ class ClusterEvent(Resource):
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    return send_from_directory(settings.UPLOAD_FOLDER, filename)
+    root_dir = os.getcwd()
+    return send_from_directory(os.path.join(root_dir, settings.UPLOAD_FOLDER), filename)
