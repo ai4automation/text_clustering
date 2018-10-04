@@ -16,8 +16,8 @@ import utils.event_cluster
 
 # flask definitions
 app = Flask(__name__, static_url_path='')
-app.wsgi_app = ReverseProxied(app.wsgi_app)
-
+# app.wsgi_app = ReverseProxied(app.wsgi_app)
+app.config['SERVER_NAME'] = settings.SERVER_NAME
 
 # flask-restplus definitions
 api = Api(app, version=settings.VERSION, title=settings.TITLE, description=settings.DESCRIPTION)
@@ -95,7 +95,7 @@ class ClusterEvent(Resource):
         return output, 200
 
 
-@app.route('/uploads/<filename>')
+@app.route('/download/<filename>')
 def uploaded_file(filename):
     root_dir = os.getcwd()
     return send_from_directory(os.path.join(root_dir, settings.UPLOAD_FOLDER), filename)

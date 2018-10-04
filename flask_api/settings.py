@@ -13,3 +13,5 @@ EVENT_API_DESCRIPTION = 'clustering of comments in logs'
 EVENT_ALLOWED_EXTENSIONS = {'csv'}
 
 UPLOAD_FOLDER = 'uploads'
+
+SERVER_NAME = 'localhost:3000'
