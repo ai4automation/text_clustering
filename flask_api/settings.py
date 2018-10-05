@@ -12,6 +12,9 @@ EVENT_API_NAMESPACE = 'event_clustering'
 EVENT_API_DESCRIPTION = 'clustering of comments in logs'
 EVENT_ALLOWED_EXTENSIONS = {'csv'}
 
+DOWNLOAD_API_NAMESPACE = 'download'
+DOWNLOAD_API_DESCRIPTION = 'download CSV files'
+
 UPLOAD_FOLDER = 'uploads'
 
 SERVER_NAME = 'localhost:3000'

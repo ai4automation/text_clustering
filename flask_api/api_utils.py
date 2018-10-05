@@ -1,3 +1,6 @@
+import uuid
+
+
 class ReverseProxied(object):
     def __init__(self, app):
         self.app = app
@@ -24,3 +27,9 @@ class ReverseProxied(object):
 def allowed_file(filename, allowed_extensions):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
+
+def get_uuid_filename(filename):
+    filename_parts = filename.rsplit('.', 1)
+    uuid_filename = filename_parts[0] + '-' + str(uuid.uuid4()) + filename_parts[1].lower()
+    return uuid_filename
