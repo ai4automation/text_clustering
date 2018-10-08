@@ -95,13 +95,13 @@ def find_labels(byte_stream, n=3, coverage=True):
     cluster = {"un-labeled": []}
     comments = json.loads(byte_stream)
     comments = list(set(comments))
-    logger.info("number of comments (unique): " + len(comments))
+    logger.info("number of comments (unique): " + str(len(comments)))
     mapping_preprocess, mapping_ngrams, candidates = get_n_grams(comments, n)
 
     ranked_phrases, score_dict = ranking(filter_unwanted(list(set(candidates))), comments, mapping_preprocess)
 
     final_list = post_process(ranked_phrases, score_dict, comments, mapping_preprocess)
-    print("ranked list: ", final_list)
+    logger.info("ranked list: " + str(final_list))
     if coverage:
         lookup_comments = [k for k in comments if len(list(set(mapping_ngrams[k]) & set(final_list))) == 0]
         for comm in lookup_comments:

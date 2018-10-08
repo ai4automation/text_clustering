@@ -95,12 +95,14 @@ class ClusterEvent(Resource):
                 logger.info('Creating upload folder: ' + settings.UPLOAD_FOLDER)
                 os.makedirs(settings.UPLOAD_FOLDER)
 
-            logger.info('Saving file to', file_path)
+            logger.info('Saving file to ' + file_path)
             args['file'].save(file_path)
 
             logger.info('Running event_cluster.run_e2e()')
             derived_filename = utils.event_cluster.run_e2e(file_path, comments_field, action_field)
-            output = {'download_url': url_for('download_file', filename=os.path.basename(derived_filename))}
+            logger.info('Derived filename is %s' % derived_filename)
+            output = {'download_url': url_for('download_file', filename=os.path.basename(derived_filename),
+                                              as_attachment=True)}
 
         except:
             logger.error('Some error occurred.\n' + traceback.format_exc())
@@ -118,7 +120,7 @@ class DownloadFile(Resource):
     @download_ns.response(400, 'Validation Error')
     @download_ns.response(500, 'Internal Server Error')
     def get(self, filename):
-        logger.info('In DownloadFile get(), filename:'+ filename)
+        logger.info('In DownloadFile get(), filename:' + filename)
 
         if not allowed_file(filename, settings.EVENT_ALLOWED_EXTENSIONS):
             logger.error('Invalid file name:' + filename)
