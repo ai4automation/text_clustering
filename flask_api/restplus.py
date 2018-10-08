@@ -38,7 +38,7 @@ class ClusterText(Resource):
         args = parsers.cluster_parser.parse_args()
 
         if not allowed_file(args['file'].filename, settings.TEXT_ALLOWED_EXTENSIONS):
-            logger.error('Invalid file name', args['file'].filename)
+            logger.error('Invalid file name ' + args['file'].filename)
             error = BadRequest()
             error.data = ['This filetype is not allowed. Please contact admin.']
             raise error
@@ -79,7 +79,7 @@ class ClusterEvent(Resource):
         args = parsers.event_parser.parse_args()
 
         if not allowed_file(args['file'].filename, settings.EVENT_ALLOWED_EXTENSIONS):
-            logger.error('Invalid file name', args['file'].filename)
+            logger.error('Invalid file name ' + args['file'].filename)
             error = BadRequest()
             error.data = ['This file type is not allowed. Please contact admin.']
             raise error
@@ -92,7 +92,7 @@ class ClusterEvent(Resource):
             file_path = os.path.join(settings.UPLOAD_FOLDER, filename)
 
             if not os.path.exists(settings.UPLOAD_FOLDER):
-                logger.info('Creating upload folder:', settings.UPLOAD_FOLDER)
+                logger.info('Creating upload folder: ' + settings.UPLOAD_FOLDER)
                 os.makedirs(settings.UPLOAD_FOLDER)
 
             logger.info('Saving file to', file_path)
@@ -103,7 +103,7 @@ class ClusterEvent(Resource):
             output = {'download_url': url_for('download_file', filename=os.path.basename(derived_filename))}
 
         except:
-            logger.error('Some error occurred.', traceback.format_exc())
+            logger.error('Some error occurred.\n' + traceback.format_exc())
             error = InternalServerError()
             error.data = ['Some error. Please contact admin.']
             raise error
@@ -118,10 +118,10 @@ class DownloadFile(Resource):
     @download_ns.response(400, 'Validation Error')
     @download_ns.response(500, 'Internal Server Error')
     def get(self, filename):
-        logger.info('In DownloadFile get(), filename:', filename)
+        logger.info('In DownloadFile get(), filename:'+ filename)
 
         if not allowed_file(filename, settings.EVENT_ALLOWED_EXTENSIONS):
-            logger.error('Invalid file name', filename)
+            logger.error('Invalid file name:' + filename)
             error = BadRequest()
             error.data = ['This file type is not allowed. Please contact admin.']
             raise error
