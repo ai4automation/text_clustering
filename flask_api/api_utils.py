@@ -31,5 +31,5 @@ def allowed_file(filename, allowed_extensions):
 
 def get_uuid_filename(filename):
     filename_parts = filename.rsplit('.', 1)
-    uuid_filename = filename_parts[0] + '-' + str(uuid.uuid4()) + filename_parts[1].lower()
+    uuid_filename = filename_parts[0] + '-' + str(uuid.uuid4()) + '.' + filename_parts[1].lower()
     return uuid_filename

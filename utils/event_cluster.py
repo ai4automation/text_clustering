@@ -3,7 +3,6 @@ import csv
 import json
 import logging
 import sys
-import os
 
 import utils.clustering as cluster
 
@@ -40,16 +39,23 @@ def read_event_comment_dict(filename, comment_field, event_field):
     with open(filename, "r") as fobj:
         reader = csv.reader(fobj)
         header = next(reader)
-        c_i = header.index(comment_field)
-        e_i = header.index(event_field)
+        try:
+            c_i = header.index(comment_field)
+            e_i = header.index(event_field)
+        except ValueError:
+            raise ValueError('Incorrect comment/event field.')
         logging.getLogger().info(header)
         logging.getLogger().info("{} is comments field idx, {} is event field idx".format(c_i, e_i))
+        print("{} is comments field idx, {} is event field idx".format(c_i, e_i))
         for row in reader:
-            key = row[e_i]
-            if len(row[c_i]) != 0:
-                if key not in event_comment_dict:
-                    event_comment_dict[key] = []
-                event_comment_dict[key].append(row[c_i])
+            try:
+                key = row[e_i]
+                if len(row[c_i]) != 0:
+                    if key not in event_comment_dict:
+                        event_comment_dict[key] = []
+                    event_comment_dict[key].append(row[c_i])
+            except IndexError:
+                pass
 
         logging.getLogger().info("Length of event dictionary: {}".format(len(event_comment_dict)))
 

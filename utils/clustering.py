@@ -1,5 +1,6 @@
 import json
 import math
+from flask_api.logger import logger
 
 from utils.preprocess import get_n_grams
 
@@ -94,7 +95,7 @@ def find_labels(byte_stream, n=3, coverage=True):
     cluster = {"un-labeled": []}
     comments = json.loads(byte_stream)
     comments = list(set(comments))
-    print("number of comments (unique): ", len(comments))
+    logger.info("number of comments (unique): ", len(comments))
     mapping_preprocess, mapping_ngrams, candidates = get_n_grams(comments, n)
 
     ranked_phrases, score_dict = ranking(filter_unwanted(list(set(candidates))), comments, mapping_preprocess)
