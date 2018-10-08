@@ -65,7 +65,10 @@ def post_process(ranked_list, M, documents, mapping, n=3):
 
     for phrase in merge.keys():
         df, pf = document_phrase_frequency(phrase, documents, mapping)
-        score_parent = pf * (-math.log(1 - df))
+        try:
+            score_parent = pf * (-math.log(1 - df))
+        except ValueError:
+            score_parent = pf
 
         score_children = [M[children] for children in merge[phrase]]
 
