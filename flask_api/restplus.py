@@ -100,7 +100,7 @@ class ClusterEvent(Resource):
 
             logger.info('Running event_cluster.run_e2e()')
             derived_filename = utils.event_cluster.run_e2e(file_path, comments_field, action_field)
-            logger.info('Derived filename is %s' % derived_filename)
+            logger.info('Created new file at %s' % derived_filename)
             output = {'download_url': url_for('download_file', filename=os.path.basename(derived_filename),
                                               as_attachment=True)}
 
