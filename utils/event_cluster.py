@@ -106,16 +106,19 @@ def write_output_csv(filename, comment_field, event_field, event_keyphrase_dict)
         writer.writerow(header)
 
         for row in reader:
-            comment = row[c_i]
-            event = row[e_i]
-            if event in event_keyphrase_dict:
-                comment2keyphrase_dict = event_keyphrase_dict[event]
-                if comment in comment2keyphrase_dict:
-                    keyphrases = comment2keyphrase_dict[comment]
-                    for p in keyphrases:
-                        new_row = row
-                        new_row.append(p)
-                        writer.writerow(new_row)
+            try:
+                comment = row[c_i]
+                event = row[e_i]
+                if event in event_keyphrase_dict:
+                    comment2keyphrase_dict = event_keyphrase_dict[event]
+                    if comment in comment2keyphrase_dict:
+                        keyphrases = comment2keyphrase_dict[comment]
+                        for p in keyphrases:
+                            new_row = row
+                            new_row.append(p)
+                            writer.writerow(new_row)
+            except IndexError:
+                pass
     return derived_filename
 
 
