@@ -20,7 +20,7 @@ def clean_html(text):
     text = text.replace('}', ' ')
     text = text.replace('{', ' ')
     text = text.replace("'m", ' am')
-    return text
+    return text.strip()
 
 
 def clean_punctuation(text):
@@ -36,7 +36,7 @@ def remove_unwanted_pos(text, nlp):
     doc = nlp(text)
 
     ENT_TYPES = ['DATE', 'TIME', 'PERCENT', 'MONEY', 'QUANTITY', 'ORDINAL', 'CARDINAL']
-    POS_TAGS = ['INTJ', 'AUX', 'CCONJ', 'ADP', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ', 'SYM', 'X', 'MD']
+    POS_TAGS = ['INTJ', 'AUX', 'CCONJ', 'ADP', 'DET', 'NUM', 'PART', 'PRON', 'SCONJ', 'SYM', 'X', 'MD', 'PRP$', 'SPACE']
     ALLOWED_PUNCTUATION = ['/', '-']
 
     output_sentences = []
@@ -65,6 +65,7 @@ def remove_unwanted_pos(text, nlp):
     for sentence in doc.sents:
         output_tokens = []
         for token in sentence:
+            print(token, token.pos_, token.tag_)
             if token.is_stop and token.text not in ALLOWED_PUNCTUATION:
                 continue
 
@@ -87,6 +88,9 @@ def remove_unwanted_pos(text, nlp):
                 continue
 
             if any(char.isdigit() for char in token.lower_):
+                continue
+
+            if token.lower_ == "n't":
                 continue
 
             # large noun phrases and named entity processing
