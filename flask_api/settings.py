@@ -1,8 +1,8 @@
 # settings
 
 VERSION = '2.0'
-TITLE = 'Semantic Clustering API'
-DESCRIPTION = 'Short text clustering API'
+TITLE = 'Multi-Label Clustering API'
+DESCRIPTION = 'Short text clustering and cluster labelling'
 
 TEXT_API_NAMESPACE = 'text_clustering'
 TEXT_API_DESCRIPTION = 'short text clustering and labelling'
