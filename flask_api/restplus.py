@@ -51,7 +51,8 @@ class ClusterText(Resource):
             raise error
 
         try:
-            coverage = True if args['coverage'] is 'true' else False
+            coverage = True if 'true' in args['coverage'] else False
+            logger.info('Coverage value is ' + str(coverage))
             mem_file = BytesIO()
             args['file'].save(mem_file)
 
