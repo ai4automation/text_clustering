@@ -3,6 +3,7 @@ import csv
 import json
 import logging
 import sys
+import copy
 
 import utils.clustering as cluster
 
@@ -114,8 +115,13 @@ def write_output_csv(filename, comment_field, event_field, event_keyphrase_dict)
                     if comment in comment2keyphrase_dict:
                         keyphrases = comment2keyphrase_dict[comment]
                         for p in keyphrases:
-                            new_row = row
+                            new_row = copy.deepcopy(row)
                             new_row.append(p)
+                            writer.writerow(new_row)
+
+                        if len(keyphrases) == 0:
+                            new_row = copy.deepcopy(row)
+                            new_row.append(event)
                             writer.writerow(new_row)
             except IndexError:
                 pass

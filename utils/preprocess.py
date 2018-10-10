@@ -20,6 +20,7 @@ def clean_html(text):
     text = text.replace('}', ' ')
     text = text.replace('{', ' ')
     text = text.replace("'m", ' am')
+    text = text.replace('"', ' ')
     return text.strip()
 
 
@@ -65,7 +66,6 @@ def remove_unwanted_pos(text, nlp):
     for sentence in doc.sents:
         output_tokens = []
         for token in sentence:
-            print(token, token.pos_, token.tag_)
             if token.is_stop and token.text not in ALLOWED_PUNCTUATION:
                 continue
 
