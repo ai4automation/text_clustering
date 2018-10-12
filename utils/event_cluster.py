@@ -84,7 +84,13 @@ def cluster_comments_for_each_event(event_comment_dict):
 
         keyphrase_dict, _ = cluster.find_labels(json_string, coverage=False)
 
+        print('coverage:', _)
+
+        assert 'un-labeled' in keyphrase_dict.keys()
+
         comment2keyphrase_dict = reverse_dictionary(keyphrase_dict)
+
+        json.dump(comment2keyphrase_dict, open('dump.json', 'w'), indent=1)
 
         logging.getLogger().debug("Key phrases for comments:{}".format(keyphrase_dict.keys()))
 
@@ -114,17 +120,25 @@ def write_output_csv(filename, comment_field, event_field, event_keyphrase_dict)
                     comment2keyphrase_dict = event_keyphrase_dict[event]
                     if comment in comment2keyphrase_dict:
                         keyphrases = comment2keyphrase_dict[comment]
-                        for p in keyphrases:
-                            new_row = copy.deepcopy(row)
-                            new_row.append(p)
-                            writer.writerow(new_row)
+                        if len(keyphrases) > 0:
+                            p = keyphrases[0]
+                            if p == 'un-labeled':
+                                new_row = copy.deepcopy(row)
+                                new_row.append(event)
+                                writer.writerow(new_row)
+                            else:
+                                new_row = copy.deepcopy(row)
+                                new_row.append(p)
+                                writer.writerow(new_row)
 
                         if len(keyphrases) == 0:
                             new_row = copy.deepcopy(row)
                             new_row.append(event)
                             writer.writerow(new_row)
             except IndexError:
-                pass
+                new_row = copy.deepcopy(row)
+                new_row.append('')
+                writer.writerow(new_row)
     return derived_filename
 
 
