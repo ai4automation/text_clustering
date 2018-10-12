@@ -6,6 +6,7 @@ import sys
 import copy
 
 import utils.clustering as cluster
+from flask_api.logger import logger
 
 
 def get_parser():
@@ -45,9 +46,9 @@ def read_event_comment_dict(filename, comment_field, event_field):
             e_i = header.index(event_field)
         except ValueError:
             raise ValueError('Incorrect comment/event field.')
-        logging.getLogger().info(header)
-        logging.getLogger().info("{} is comments field idx, {} is event field idx".format(c_i, e_i))
-        print("{} is comments field idx, {} is event field idx".format(c_i, e_i))
+        logger.info(header)
+        logger.info("{} is comments field idx, {} is event field idx".format(c_i, e_i))
+        logger.debug("{} is comments field idx, {} is event field idx".format(c_i, e_i))
         for row in reader:
             try:
                 key = row[e_i]
@@ -58,7 +59,7 @@ def read_event_comment_dict(filename, comment_field, event_field):
             except IndexError:
                 pass
 
-        logging.getLogger().info("Length of event dictionary: {}".format(len(event_comment_dict)))
+        logger.info("Length of event dictionary: {}".format(len(event_comment_dict)))
 
     return event_comment_dict
 
@@ -76,23 +77,21 @@ def logger_init():
 def cluster_comments_for_each_event(event_comment_dict):
     # Hash of Hashes: Key for the first is event name, and for value key is key-phrase
     event_keyphrase_dict = {}
-    logging.getLogger().debug("Actions for which comments are present:{}".format(event_comment_dict.keys()))
+    logger.debug("Actions for which comments are present:{}".format(event_comment_dict.keys()))
     for event in event_comment_dict.keys():
-        print(len(event_comment_dict[event]))
+        logger.debug('length of event_comment_dict[event]:' + str(len(event_comment_dict[event])))
         json_string = json.dumps(event_comment_dict[event])
-        # logging.getLogger().info(json_string);
+        # logger.info(json_string);
 
         keyphrase_dict, _ = cluster.find_labels(json_string, coverage=False)
 
-        print('coverage:', _)
+        logger.debug('coverage:' + str(_))
 
         assert 'un-labeled' in keyphrase_dict.keys()
 
         comment2keyphrase_dict = reverse_dictionary(keyphrase_dict)
 
-        json.dump(comment2keyphrase_dict, open('dump.json', 'w'), indent=1)
-
-        logging.getLogger().debug("Key phrases for comments:{}".format(keyphrase_dict.keys()))
+        logger.debug("Key phrases for comments:{}".format(keyphrase_dict.keys()))
 
         event_keyphrase_dict[event] = comment2keyphrase_dict
     return event_keyphrase_dict
@@ -109,7 +108,7 @@ def write_output_csv(filename, comment_field, event_field, event_keyphrase_dict)
         header.append("DERIVED_ACTION")
         f = open(derived_filename, 'w')
         writer = csv.writer(f, delimiter=',')
-        print(header)
+        logger.debug('CSV header:' + str(header))
         writer.writerow(header)
 
         for row in reader:
@@ -131,11 +130,21 @@ def write_output_csv(filename, comment_field, event_field, event_keyphrase_dict)
                                 new_row.append(p)
                                 writer.writerow(new_row)
 
-                        if len(keyphrases) == 0:
+                        else:
                             new_row = copy.deepcopy(row)
                             new_row.append(event)
                             writer.writerow(new_row)
+                    else:
+                        new_row = copy.deepcopy(row)
+                        new_row.append(event)
+                        writer.writerow(new_row)
+                else:
+                    new_row = copy.deepcopy(row)
+                    new_row.append('')
+                    writer.writerow(new_row)
             except IndexError:
+                logger.error('IndexError:' + str(row) + str(len(row)))
+                logger.info('Some IndexError encountered. Writing existing row.')
                 new_row = copy.deepcopy(row)
                 new_row.append('')
                 writer.writerow(new_row)
