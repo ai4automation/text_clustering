@@ -1,5 +1,9 @@
-flask_restplus==0.10.1
-nltk==3.3
 spacy==2.0.12
+langdetect==1.0.7
+nltk==3.3
 Werkzeug==0.14.1
+tqdm==4.24.0
+spacy_cld==0.1.0
+flask_restplus==0.10.1
 Flask==1.0.2
+talon==1.4.4

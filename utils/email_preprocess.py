@@ -14,7 +14,7 @@ def remove_regex(text, regex_list):
         pattern = pattern.replace('[', '\[')
         pattern = pattern.replace(']', '\]')
         text = re.sub(pattern, """""", text, flags=re.I | re.S)
-    text = re.sub("""\[(.*)\]""", """""", text, flags=re.I | re.S)
+    text = re.sub("\[(.*)\]", """""", text, flags=re.I | re.S)
     return text
 
 
