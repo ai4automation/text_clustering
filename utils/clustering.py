@@ -99,9 +99,7 @@ def find_labels(byte_stream, n=3, coverage=True):
     mapping_preprocess, mapping_ngrams, candidates = get_n_grams(comments, n)
 
     ranked_phrases, score_dict = ranking(filter_unwanted(list(set(candidates))), comments, mapping_preprocess)
-
-    final_list = post_process(ranked_phrases, score_dict, comments, mapping_preprocess)
-    logger.info("ranked list: " + str(final_list))
+    final_list = ranked_phrases
     if coverage:
         lookup_comments = [k for k in comments if len(list(set(mapping_ngrams[k]) & set(final_list))) == 0]
         for comm in lookup_comments:
@@ -112,6 +110,8 @@ def find_labels(byte_stream, n=3, coverage=True):
                 if len(ranked_lookup) > 0:
                     final_list.append(ranked_lookup[0])
     final_list = list(set(final_list))
+    final_list = post_process(final_list, score_dict, comments, mapping_preprocess)
+    logger.info("ranked list: " + str(final_list))
 
     for i in range(0, len(comments)):
         flag = 0

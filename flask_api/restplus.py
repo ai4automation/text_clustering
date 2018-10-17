@@ -17,8 +17,7 @@ import utils.event_cluster
 
 # flask definitions
 app = Flask(__name__, static_url_path='')
-# app.wsgi_app = ReverseProxied(app.wsgi_app)
-app.config['SERVER_NAME'] = settings.SERVER_NAME
+app.wsgi_app = ReverseProxied(app.wsgi_app)
 
 # flask-restplus definitions
 api = Api(app, version=settings.VERSION, title=settings.TITLE, description=settings.DESCRIPTION)
