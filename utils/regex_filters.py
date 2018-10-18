@@ -45,7 +45,8 @@ regex_filters = {
         "Blueworks Live",
         "Dustie ",
         "Christine ",
-        "Blue Works"
+        "Blue Works",
+        "blue work",
         "Greg ",
         "BWL ",
         "team ",
