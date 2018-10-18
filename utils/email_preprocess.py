@@ -27,6 +27,7 @@ def remove_text(text, stopword_list):
 
 def spacy_pipeline(text, nlp):
     ENTITY_TYPES = ['PERSON', 'NORP', 'FAC', 'ORG', 'GPE', 'LOC', 'PRODUCT', 'EVENT', 'LANGUAGE']
+    OTHER_WORDS = ["hi", "hello", "hey"]
 
     english_sentences = []
     doc = nlp(text)
@@ -44,6 +45,8 @@ def spacy_pipeline(text, nlp):
     for sentence in english_sentences:
         for token in sentence:
             if token.ent_type_ in ENTITY_TYPES:
+                continue
+            if token.lemma_ in OTHER_WORDS:
                 continue
             filtered_tokens.append(token)
 
