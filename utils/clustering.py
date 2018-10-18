@@ -76,6 +76,8 @@ def post_process(ranked_list, M, documents, mapping, n=3):
         if score_parent > max(score_children):
             final_list.append(phrase)
             final_list = list(set(final_list) - set(merge[phrase]))
+
+    final_list = list(filter(lambda x: [x for i in final_list if x in i and x != i] == [], final_list))
     return final_list
 
 
