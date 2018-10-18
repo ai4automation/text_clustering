@@ -6,6 +6,7 @@ from tqdm import tqdm
 import traceback
 from talon.signature.bruteforce import extract_signature
 from langdetect import detect
+from utils.regex_filters import regex_filters
 
 
 def remove_regex(text, regex_list):
@@ -46,25 +47,21 @@ def spacy_pipeline(text, nlp):
                 continue
             filtered_tokens.append(token)
 
-    return ' '.join([token.text for token in filtered_tokens])
+    return ''.join([token.text_with_ws for token in filtered_tokens])
 
 
-def email_pre_process(text, nlp, json_filename):
-    filters = json.load(open(json_filename))
-
+def email_pre_process(text, nlp, filters):
     text, _ = extract_signature(text)
     text = remove_regex(text, filters['regex'])
     text = remove_text(text, filters['text'])
     text = spacy_pipeline(text, nlp)
 
-    return text
+    return text.strip()
 
 
 if __name__ == '__main__':
     with open('/Users/tanmayee/Downloads/BlueWorks_description.txt', encoding='utf-8') as f:
         lines = f.readlines()
-
-    json_file = '/Users/tanmayee/Downloads/filters.json'
 
     nlp = spacy.load('en')
     language_detector = LanguageDetector()
@@ -73,7 +70,7 @@ if __name__ == '__main__':
     output, count = [], 0
     for line in tqdm(lines):
         try:
-            output.append(email_pre_process(line, nlp, json_file))
+            output.append(email_pre_process(line, nlp, regex_filters))
         except:
             count += 1
             output.append(traceback.format_exc(limit=1))
