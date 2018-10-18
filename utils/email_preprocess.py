@@ -28,8 +28,7 @@ def remove_text(text, stopword_list):
 
 def spacy_pipeline(text, nlp):
     ENTITY_TYPES = ['PERSON', 'NORP', 'FAC', 'ORG', 'GPE', 'LOC', 'PRODUCT', 'EVENT', 'LANGUAGE']
-    OTHER_WORDS = ["hi", "hello", "hey", "contact", "kindly", "let", "need", "use", "know", "help", "want",
-                   "business", "unit", "instead", "find", "employees", "wondering"]
+    OTHER_WORDS = ["hi", "hello", "hey"]
 
     english_sentences = []
     doc = nlp(text)

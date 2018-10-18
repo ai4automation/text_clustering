@@ -102,6 +102,26 @@ regex_filters = {
         "Sent from(.*)",
         "procurement operations process(.*)",
         "this e-mail and any attachments are intended only for the named recipient(.*)",
-        "associate director(.*)"
+        "associate director(.*)",
+        "Director, , : john.cannon@militarycars.com (.*)",
+        "This e-mail is confidential, may be legally privileged. (.*)",
+        "\| Card Scheme Development \|(.*)",
+        "\| Client Technical Enablement- Process Transformation(.*)",
+        "\| \| Sr. Managing Consultant \|(.*)",
+        "\| Solution Enablement  Administrator (.*)",
+        "FACTS Project Manager 541-475-2234 ex 175(.*)",
+        "This e-mail and any attachments are(.*)",
+        "Good Evening,",
+        "Dear Blueworks Team",
+        "\!\!\!(.*)",
+        ", I am the Global Client Director for .",
+        "Ramesh B.M Subject IBM(.*)",
+        "CALLOWN(.*)",
+        "Manager \| \| 305 715 6782(.*)",
+        "NPE Valuations Manager(.*)",
+        "\| Control Enhancement Manager(.*)",
+        "\| Tel \+44 \(0\)20 7116 5558 \|(.*)",
+        "Dear IBM Team,(.*)",
+        "The attachment\(s\) appendix1_ibm_bwl_cloud_services_descri"
     ]
 }
