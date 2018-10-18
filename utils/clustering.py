@@ -83,8 +83,7 @@ def filter_unwanted(candidates):
     unwanted = ["thank", "ibm", "please", "apologize", "dear", "sincerely", "helpdesk", "better",
                 "help-desk", "telephone", "regards", "regret", "gmail", "yahoo", "hotmail",
                 "center", "exit", "time", "access", "administrator", "support", "assist", "skills",
-                "proveitsupport", "contact", "kindly", "let", "need", "use", "know", "help", "want",
-                "business", "unit", "instead", "find", "employees", "wondering"]
+                "proveitsupport", "contact"]
 
     filtered = filter(lambda phrase_: not any(n in phrase_ for n in unwanted), candidates)
     filtered = list(filtered)

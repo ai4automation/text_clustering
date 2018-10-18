@@ -28,7 +28,8 @@ def remove_text(text, stopword_list):
 
 def spacy_pipeline(text, nlp):
     ENTITY_TYPES = ['PERSON', 'NORP', 'FAC', 'ORG', 'GPE', 'LOC', 'PRODUCT', 'EVENT', 'LANGUAGE']
-    OTHER_WORDS = ["hi", "hello", "hey"]
+    OTHER_WORDS = ["hi", "hello", "hey", "contact", "kindly", "let", "need", "use", "know", "help", "want",
+                   "business", "unit", "instead", "find", "employees", "wondering"]
 
     english_sentences = []
     doc = nlp(text)
@@ -79,5 +80,5 @@ if __name__ == '__main__':
             count += 1
             output.append(traceback.format_exc(limit=1))
 
-    print('%f lines skipped, %d lines skipped' % (count/len(lines), count))
+    print('%f lines skipped, %d lines skipped' % (count / len(lines), count))
     json.dump(output, open('filtered_output.json', 'w'), indent=1)

@@ -56,7 +56,7 @@ regex_filters = {
         "hello blueworks support team",
         "good evening all",
         "i am thilini from support",
-        "I hope this e-mail finds you well",
+        "I hope this e-mail finds you well"
     ],
     "regex": [
         "Thanks(.*)",
