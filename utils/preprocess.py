@@ -140,10 +140,10 @@ def remove_unwanted_pos(text, nlp):
                     elif any(char.isdigit() for char in t.lower_):
                         continue
                     else:
-                        small_docs_token_lemma.append(t)
+                        small_docs_token_lemma.append(t.lemma_)
                 output_tokens.extend(small_docs_token_lemma)
             else:
-                output_tokens.append(token)
+                output_tokens.append(token.lemma_)
         output_sentences.append(output_tokens)
     return output_sentences
 
