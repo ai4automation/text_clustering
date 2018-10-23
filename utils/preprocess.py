@@ -140,10 +140,10 @@ def remove_unwanted_pos(text, nlp):
                     elif any(char.isdigit() for char in t.lower_):
                         continue
                     else:
-                        small_docs_token_lemma.append(t.lemma_)
+                        small_docs_token_lemma.append(t)
                 output_tokens.extend(small_docs_token_lemma)
             else:
-                output_tokens.append(token.lemma_)
+                output_tokens.append(token)
         output_sentences.append(output_tokens)
     return output_sentences
 
@@ -196,11 +196,11 @@ def get_n_grams(list_of_texts, n=3):
             elif len(' '.join([ng.lower_.strip() for ng in one_ngram]).strip().split()) != n:
                 pass
             elif sum([token.pos_ == 'VERB' for token in one_ngram]) > 0:
-                one_text_ngrams.append(' '.join([ng.lower_.strip() for ng in one_ngram]).strip())
+                one_text_ngrams.append(' '.join([ng.lemma_.strip() for ng in one_ngram]).strip())
             elif len(list(one_ngram[0].doc.ents)) > 0:
-                one_text_ngrams.append(' '.join([ng.lower_.strip() for ng in one_ngram]).strip())
+                one_text_ngrams.append(' '.join([ng.lemma_.strip() for ng in one_ngram]).strip())
             elif len(list(one_ngram[0].doc.noun_chunks)) > 0:
-                one_text_ngrams.append(' '.join([ng.lower_.strip() for ng in one_ngram]).strip())
+                one_text_ngrams.append(' '.join([ng.lemma_.strip() for ng in one_ngram]).strip())
             else:
                 pass
         output_phrases.append(one_text_ngrams)
