@@ -85,7 +85,7 @@ def filter_unwanted(candidates):
     unwanted = ["thank", "ibm", "please", "apologize", "dear", "sincerely", "helpdesk", "better",
                 "help-desk", "telephone", "regards", "regret", "gmail", "yahoo", "hotmail",
                 "center", "exit", "administrator", "support", "skills",
-                "proveitsupport", "contact", "kindly", "let", "need", "use", "know", "help", "want",
+                "proveitsupport", "contact", "kindly", "use", "know", "help", "want",
                 "business", "unit", "instead", "find", "employees", "wondering"]
 
     filtered = filter(lambda phrase_: not any(n in phrase_ for n in unwanted), candidates)
@@ -100,7 +100,7 @@ def find_labels(byte_stream, n=3, coverage=True):
     comments = list(set(comments))
     logger.info("number of comments (unique): " + str(len(comments)))
     mapping_preprocess, mapping_ngrams, candidates = get_n_grams(comments, n)
-
+    #print(candidates)
     ranked_phrases, score_dict = ranking(filter_unwanted(list(set(candidates))), comments, mapping_preprocess)
     final_list = ranked_phrases
     if coverage:
@@ -113,7 +113,7 @@ def find_labels(byte_stream, n=3, coverage=True):
                 if len(ranked_lookup) > 0:
                     final_list.append(ranked_lookup[0])
     final_list = list(set(final_list))
-    final_list = post_process(final_list, score_dict, comments, mapping_preprocess)
+    final_list = post_process(final_list, score_dict, comments, mapping_preprocess,n)
     logger.info("ranked list: " + str(final_list))
 
     for i in range(0, len(comments)):

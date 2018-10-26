@@ -1,16 +1,16 @@
 import uuid
 
 
-MY_PREFIX = '/ccspd/dev/textclustering'
-
+#MY_PREFIX = '/ccspd/dev/textclustering'
+#MY_PREFIX = '/'
 
 class ReverseProxied(object):
     def __init__(self, app):
         self.app = app
 
     def __call__(self, environ, start_response):
-        script_name = MY_PREFIX
-        # script_name = environ.get('HTTP_X_SCRIPT_NAME', '')
+        #script_name = MY_PREFIX
+        script_name = environ.get('HTTP_X_SCRIPT_NAME', '')
         if script_name:
             environ['SCRIPT_NAME'] = script_name
             path_info = environ['PATH_INFO']
