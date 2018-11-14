@@ -183,6 +183,10 @@ def get_n_grams(list_of_texts, n=3):
     for text in all_n_grams:
         one_text_ngrams = []
         for one_ngram in text:
+            verb_count = sum([token.pos_ == 'VERB' for token in one_ngram])
+            entity_count = len(list(one_ngram[0].doc.ents))
+            noun_chunk_count = len(list(one_ngram[0].doc.noun_chunks))
+
             if one_ngram[0].pos_ in POS_TAGS or one_ngram[0].tag_ in POS_TAGS:
                 pass
             elif one_ngram[-1].pos_ in POS_TAGS or one_ngram[-1].tag_ in POS_TAGS:
@@ -195,11 +199,7 @@ def get_n_grams(list_of_texts, n=3):
                 pass
             elif len(' '.join([ng.lower_.strip() for ng in one_ngram]).strip().split()) != n:
                 pass
-            elif sum([token.pos_ == 'VERB' for token in one_ngram]) > 0:
-                one_text_ngrams.append(' '.join([ng.lemma_.strip() for ng in one_ngram]).strip())
-            elif len(list(one_ngram[0].doc.ents)) > 0:
-                one_text_ngrams.append(' '.join([ng.lemma_.strip() for ng in one_ngram]).strip())
-            elif len(list(one_ngram[0].doc.noun_chunks)) > 0:
+            elif verb_count > 0 and (entity_count > 0 or noun_chunk_count > 0):
                 one_text_ngrams.append(' '.join([ng.lemma_.strip() for ng in one_ngram]).strip())
             else:
                 pass
