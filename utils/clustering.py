@@ -84,8 +84,8 @@ def post_process(ranked_list, M, documents, mapping, n=3):
 def filter_unwanted(candidates):
     unwanted = ["thank", "ibm", "please", "apologize", "dear", "sincerely", "helpdesk", "better",
                 "help-desk", "telephone", "regards", "regret", "gmail", "yahoo", "hotmail",
-                "center", "exit", "administrator", "support", "skills",
-                "proveitsupport", "contact", "kindly", "use", "know", "help", "want",
+                "center", "exit", "time", "access", "administrator", "support", "assist", "skills",
+                "proveitsupport", "contact", "kindly", "let", "need", "use", "know", "help", "want",
                 "business", "unit", "instead", "find", "employees", "wondering"]
 
     filtered = filter(lambda phrase_: not any(n in phrase_ for n in unwanted), candidates)

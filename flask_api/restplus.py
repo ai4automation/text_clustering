@@ -1,5 +1,6 @@
+import os
+import traceback
 from io import BytesIO
-import os, traceback
 
 from flask import Flask, url_for, send_from_directory
 from flask_restplus import Api, Resource
@@ -8,12 +9,10 @@ from werkzeug.utils import secure_filename
 
 import flask_api.parsers as parsers
 import flask_api.settings as settings
+import utils.event_cluster
 from flask_api.api_utils import ReverseProxied, allowed_file, get_uuid_filename
 from flask_api.logger import logger
-
 from utils.clustering import find_labels
-import utils.event_cluster
-
 
 # flask definitions
 app = Flask(__name__, static_url_path='')
