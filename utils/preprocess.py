@@ -183,9 +183,10 @@ def get_n_grams(list_of_texts, n=3):
     for text in all_n_grams:
         one_text_ngrams = []
         for one_ngram in text:
+            n_gram_doc = nlp(' '.join([token.text for token in one_ngram]))
             verb_count = sum([token.pos_ == 'VERB' for token in one_ngram])
-            entity_count = len(list(one_ngram[0].doc.ents))
-            noun_chunk_count = len(list(one_ngram[0].doc.noun_chunks))
+            entity_count = len(list(n_gram_doc.ents))
+            noun_chunk_count = sum(list([len(token.text.split()) > 1 for token in n_gram_doc.noun_chunks]))
 
             if one_ngram[0].pos_ in POS_TAGS or one_ngram[0].tag_ in POS_TAGS:
                 pass
