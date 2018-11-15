@@ -139,4 +139,13 @@ def find_labels(byte_stream, n=3, coverage=True):
             except KeyError:
                 cluster[phrase] = [comments[i]]
 
-    return cluster, (len(comments) - len(cluster["un-labeled"])) / float(len(comments))
+    bow_cluster = {}
+    for phrase in cluster:
+        key = frozenset(phrase.split())
+        try:
+            bow_cluster[key].extend(cluster[phrase])
+        except KeyError:
+            bow_cluster[key] = cluster[phrase]
+    bow_cluster = dict((' '.join(key), value) for (key, value) in bow_cluster.items())
+
+    return bow_cluster, (len(comments) - len(cluster["un-labeled"])) / float(len(comments))
