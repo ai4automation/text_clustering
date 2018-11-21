@@ -140,12 +140,16 @@ def find_labels(byte_stream, n=3, coverage=True):
                 cluster[phrase] = [comments[i]]
 
     bow_cluster = {}
+    mapping_keys = {}
     for phrase in cluster:
-        key = frozenset(phrase.split())
-        try:
-            bow_cluster[key].extend(cluster[phrase])
-        except KeyError:
-            bow_cluster[key] = cluster[phrase]
-    bow_cluster = dict((' '.join(key), value) for (key, value) in bow_cluster.items())
-
+        #if phrase != "un-labeled":
+            key = frozenset(phrase.split())
+            mapping_keys[key] = phrase
+            try:
+               bow_cluster[key].extend(cluster[phrase])
+            except KeyError:
+               bow_cluster[key] = cluster[phrase]
+    #bow_cluster = dict((' '.join(key), value) for (key, value) in bow_cluster.items())
+    bow_cluster = dict((mapping_keys[key], value) for (key, value) in bow_cluster.items())
+    #bow_cluster["un-labeled"] = cluster["un-labeled"]
     return bow_cluster, (len(comments) - len(cluster["un-labeled"])) / float(len(comments))
