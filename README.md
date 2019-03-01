@@ -7,5 +7,8 @@
  
 ### To Run
 ```bash
-python main.py
+python3.5 main.py
+open http://0.0.0.0:5000/ on browser
+choose text_clustering
+upload json file, specify n=3 and coverage as True
 ```
