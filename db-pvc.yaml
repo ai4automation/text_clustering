@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-pvc
+spec:
+  accessModes: [ "ReadWriteMany" ]
+  storageClassName: ibmc-file-silver
+  resources:
+    requests:
+      storage: 1Gi

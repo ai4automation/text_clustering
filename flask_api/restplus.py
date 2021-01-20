@@ -6,7 +6,7 @@ from flask import Flask, url_for, send_from_directory
 from flask_restplus import Api, Resource
 from werkzeug.exceptions import InternalServerError, BadRequest
 from werkzeug.utils import secure_filename
-
+from flask_cors import CORS
 import flask_api.parsers as parsers
 import flask_api.settings as settings
 import utils.event_cluster
@@ -17,9 +17,10 @@ from utils.clustering import find_labels
 # flask definitions
 app = Flask(__name__, static_url_path='')
 app.wsgi_app = ReverseProxied(app.wsgi_app)
-
+cors = CORS(app, resources={r'/*': {'origins': '*'}})
 # flask-restplus definitions
 api = Api(app, version=settings.VERSION, title=settings.TITLE, description=settings.DESCRIPTION)
+
 text_cluster_ns = api.namespace(settings.TEXT_API_NAMESPACE, description=settings.TEXT_API_DESCRIPTION)
 event_cluster_ns = api.namespace(settings.EVENT_API_NAMESPACE, description=settings.EVENT_API_DESCRIPTION)
 download_ns = api.namespace(settings.DOWNLOAD_API_NAMESPACE, description=settings.DOWNLOAD_API_DESCRIPTION)

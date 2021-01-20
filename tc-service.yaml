@@ -1,0 +1,35 @@
+# Kubernetes API version to be used for the configuration below. does not change for each app
+#Kubernetes gives Pods their own IP addresses and a single DNS name for a set of Pods, and can load-balance across them.
+# Kubernetes Pods are created and destroyed to match the state of your cluster. Pods are nonpermanent resources. If you use a Deployment to run your app, it can create and destroy Pods dynamically.
+
+# Each Pod gets its own IP address, however in a Deployment, the set of Pods running in one moment in time could be different from the set of Pods running that application a moment later.
+# This leads to a problem: if some set of Pods (call them "backends") provides functionality to other Pods (call them "frontends") inside your cluster, how do the frontends find out and keep track of which IP address to connect to, so that the frontend can use the backend part of the workload?
+apiVersion: v1
+# This is for a service object for backend service
+kind: Service
+metadata:
+  # This is service object name
+  name: tc-service
+  # labels for the service getting to this service
+  labels:
+    app: tc-service
+spec:
+  # There are various types of services: NodePort, ClusterIP,LoadBalancer, etc etc: 
+  # Check Documentation here https://kubernetes.io/docs/concepts/services-networking/service/
+  type: NodePort
+  ports:
+   # Note: A Service can map any incoming port to a targetPort.  Here we are maping service port 28888 to containerPort 8888
+   # 28888 is accessbile only internally to cluster, 38888 exposes service to external. 
+   # Port at which service is listening
+  - name: tc-service-p
+    port: 28888  
+    # port to which the service should route the traffic (containerPort)
+    # this is the container port defined in backend container
+    targetPort: tc-container-p # where pod or container port is explosed
+    # Port at which service is available outside of cluster. If the 
+    # nodePort is outside of range, it will error when you apply. 
+    nodePort: 32000
+  # Selector for pods (Service uses this label to select the pods it should connect to)
+  # If you look at deployment object for backend, you see that labels for pods are backend-pods 
+  selector:
+    app: tc-pods

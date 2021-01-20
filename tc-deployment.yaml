@@ -1,0 +1,65 @@
+# k8 object yaml contains AKMS (API, Kind, Metadata, Spec)
+
+# Kubernetes API and version that would be used for deployment
+# This doesnt change for each image or application. 
+apiVersion: apps/v1 
+# Kind of the object this yaml defines
+kind: Deployment
+# meta data about this object
+metadata:
+  # name of this deployment object - It is recommended that we use one deployment object per microservice
+  name: tc-deployment
+  # Labels are key/value pairs that are attached to objects, such as pods. 
+  # Labels are intended to be used to specify identifying attributes of objects 
+  # that are meaningful and relevant to users, but do not directly imply semantics 
+  # to the core system. Labels can be used to organize and to select subsets of objects. 
+  # Labels can be attached to objects at creation time and subsequently added and modified at any time. 
+  # Each object can have a set of key/value labels defined. Each Key must be unique for a given object.
+  labels:
+    app: tc-deployment # application name label
+    environment: test # example label for which env this object is for (test/production)
+spec:
+  # Run two pods for this micro-service. 
+  replicas: 2
+  #The .spec.selector field defines how the Deployment finds which Pods to manage
+  #For now you can keep it same as name labels specified in template.metadata.labels.app
+  selector:
+    matchLabels:
+      app: tc-pods
+  #The template field contains the following sub-fields:
+  #The Pods are labeled app: backend-pods using the .metadata.labels field.
+  #The Pod template's specification, or .template.spec field, indicates that the Pods run one container, backend-container, which runs the backend image from ICR.  
+  # Create one container and name it nginx using the .spec.template.spec.containers[0].name field.
+  template:
+    metadata:
+      labels:
+        app: tc-pods
+    spec:
+      containers:
+      - name: tc-container
+        image: us.icr.io/research3/ai4ba-text-clustering:v1
+        imagePullPolicy: Always # Default value
+        #ContainerPort is used to decide which of the container's ports should be used by the service in case a container has multiple ports
+        #The container can bind to ports which will be made available on the pod’s IP.
+        #“containerPort” defines the port on which app can be reached  inside the container, on what port the app is running inside container
+        ports:
+        #backend flask app is running on 8888
+        #it is advisable to name the port so that you can change the name to another port
+        #with out affecting other service objects etc. 
+        - name: tc-container-p
+          containerPort: 5000
+        volumeMounts:
+          - name: tc-persistent-storage
+            mountPath: /data/db
+        #env:
+        # - name: GREET-LANGUAGE
+        #   value: ENGLISH
+      #password for accessing image repository (us.icr.io/research3/*), these are defined in 
+      # secrets tab of OCP cluster, so get this from cluster
+      imagePullSecrets:
+        - name: ai4ba-all-icr-io
+          
+      volumes:
+        - name: tc-persistent-storage
+          persistentVolumeClaim:
+            claimName: db-pvc
